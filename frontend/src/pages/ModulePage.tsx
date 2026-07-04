@@ -24,77 +24,64 @@ export default function ModulePage() {
 
   return (
     <div className="min-h-screen bg-navy text-white">
-      <div className="px-5 py-7 max-w-2xl mx-auto">
+      <div className="max-w-5xl mx-auto px-6 py-8">
 
         {/* Back */}
-        <Link
-          to="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-6 transition-colors"
-        >
+        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-6 transition-colors">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M9 11L5 7l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Back to Dashboard
         </Link>
 
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white mb-1">{module.title}</h1>
-          {module.description && (
-            <p className="text-sm text-slate-400 leading-relaxed">{module.description}</p>
-          )}
-        </div>
+        {/* Two-column on desktop: header + progress left, topics right */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8">
 
-        {/* Progress */}
-        <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <p className="text-xs text-slate-400">Module Progress</p>
-            <p className="text-xs font-semibold text-brand-light">{pct}%</p>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-white/10">
-            <div
-              className="h-1.5 rounded-full bg-gradient-to-r from-brand to-accent transition-all duration-500"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1.5">
-            {completedCount}/{module.topics.length} topics completed
-          </p>
-        </div>
-
-        {/* Topics */}
-        <div className="space-y-2">
-          {module.topics.map((t, i) => (
-            <Link
-              key={t.id}
-              to={`/modules/${moduleSlug}/topics/${t.slug}`}
-              className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 hover:border-brand/40 hover:bg-brand/5 transition-all group"
-            >
-              <div
-                className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold transition-colors ${
-                  t.isCompleted
-                    ? 'bg-accent text-white'
-                    : 'bg-white/10 text-slate-400 group-hover:bg-brand/20 group-hover:text-brand-light'
-                }`}
-              >
-                {t.isCompleted ? '✓' : i + 1}
+          {/* Left: header + progress */}
+          <div className="lg:col-span-1 mb-6 lg:mb-0">
+            <div className="lg:sticky lg:top-24">
+              <h1 className="text-2xl font-bold text-white mb-2">{module.title}</h1>
+              {module.description && (
+                <p className="text-sm text-slate-400 leading-relaxed mb-6">{module.description}</p>
+              )}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs text-slate-400">Progress</p>
+                  <p className="text-xs font-semibold text-brand-light">{pct}%</p>
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/10">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-brand to-accent transition-all duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 mt-2">{completedCount}/{module.topics.length} topics completed</p>
               </div>
-              <span className="text-sm text-slate-200 group-hover:text-white transition-colors flex-1">
-                {t.title}
-              </span>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                className="text-slate-600 group-hover:text-slate-400 flex-shrink-0"
-              >
-                <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </Link>
-          ))}
-        </div>
+            </div>
+          </div>
 
+          {/* Right: topics list */}
+          <div className="lg:col-span-2">
+            <div className="space-y-2">
+              {module.topics.map((t, i) => (
+                <Link
+                  key={t.id}
+                  to={`/modules/${moduleSlug}/topics/${t.slug}`}
+                  className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 hover:border-brand/40 hover:bg-brand/5 transition-all group"
+                >
+                  <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold transition-colors ${t.isCompleted ? 'bg-accent text-white' : 'bg-white/10 text-slate-400 group-hover:bg-brand/20 group-hover:text-brand-light'}`}>
+                    {t.isCompleted ? '✓' : i + 1}
+                  </div>
+                  <span className="text-sm text-slate-200 group-hover:text-white transition-colors flex-1">{t.title}</span>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-slate-600 group-hover:text-slate-400 flex-shrink-0">
+                    <path d="M5 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
   )
