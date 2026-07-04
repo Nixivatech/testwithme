@@ -47,6 +47,8 @@ var allowedOrigins =
     ?? Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',', StringSplitOptions.RemoveEmptyEntries)
     ?? [];
 
+Console.WriteLine($"[CORS] AllowedOrigins: {string.Join(", ", allowedOrigins)}");
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
