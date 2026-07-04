@@ -7,7 +7,7 @@ export default function Landing() {
         Built for Aspiring QA Engineers
       </div>
       <h1 className="text-3xl font-bold leading-tight mb-3">
-        Become a <span className="text-brand-light">QA Testing Pro</span>
+        Become a <span className="text-brand-light">QA Pro</span> with Mathilens
       </h1>
       <p className="text-sm text-slate-400 leading-relaxed mb-7 max-w-md mx-auto">
         Structured notes, hands-on practice & progress tracking — everything you need to go from zero to hired.
