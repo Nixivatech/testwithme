@@ -11,6 +11,8 @@ import CertificateVerify from './pages/CertificateVerify'
 import Pricing from './pages/Pricing'
 import Admin from './pages/Admin'
 import LogoConcepts from './pages/LogoConcepts'
+import BrowsePage from './pages/BrowsePage'
+import TestPage from './pages/TestPage'
 
 export default function App() {
   return (
@@ -25,9 +27,11 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/browse" element={<BrowsePage />} />
           <Route path="/modules/:moduleSlug" element={<ModulePage />} />
           <Route path="/modules/:moduleSlug/topics/:topicSlug" element={<TopicPage />} />
           <Route path="/certificates" element={<Certificates />} />
+          <Route path="/test" element={<TestPage />} />
         </Route>
 
         <Route element={<ProtectedRoute adminOnly />}>

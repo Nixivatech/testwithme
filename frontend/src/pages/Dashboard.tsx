@@ -44,6 +44,29 @@ export default function Dashboard() {
           <p className="text-sm text-slate-400 leading-relaxed max-w-md mx-auto mt-3">
             Your structured path from beginner to QA professional. Learn real-world testing skills, track your progress, and land your first QA job.
           </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/browse"
+              className="inline-flex items-center gap-2 bg-brand text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-brand/90 active:scale-95 transition-all"
+            >
+              Find Topics to Learn
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3l5 5-5 5M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Link>
+            {completedTopics > 0 && (
+              <Link
+                to="/test"
+                className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-white/15 active:scale-95 transition-all"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M5 7h6M5 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                Take Test
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -91,7 +114,7 @@ export default function Dashboard() {
         </div>
 
         {/* Modules — 2 columns on desktop */}
-        <div>
+        <div id="modules">
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">Learning Modules</p>
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -123,7 +146,8 @@ export default function Dashboard() {
                       <div className="flex gap-1.5 flex-shrink-0 ml-2">
                         {isComplete && <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full">Done ✓</span>}
                         {isStarted && <span className="text-[10px] font-semibold bg-brand/20 text-brand-light px-2 py-0.5 rounded-full">In Progress</span>}
-                        {m.isPro && <span className="text-[10px] font-semibold bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">Pro</span>}
+                        {m.price != null && <span className="text-[10px] font-bold bg-brand/20 text-brand-light px-2 py-0.5 rounded-full">₹{m.price}</span>}
+                        {m.isPro && !m.price && <span className="text-[10px] font-semibold bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">Pro</span>}
                       </div>
                     </div>
                     {m.description && <p className="text-xs text-slate-400 mb-3 leading-relaxed flex-1">{m.description}</p>}

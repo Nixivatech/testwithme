@@ -1,4 +1,5 @@
 using System.Text;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICertificateService, CertificateService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
 
@@ -79,5 +81,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Pre-warm Google's JWKS certificate cache so the first login isn't slow.
+// ValidateAsync will fail on this dummy token but will fetch+cache Google's public keys.
+_ = Task.Run(async () =>
+{
+    try { await GoogleJsonWebSignature.ValidateAsync("eyJhbGciOiJSUzI1NiIsImtpZCI6InRlc3QifQ.eyJzdWIiOiJ3YXJtdXAifQ.c2lnbmF0dXJl"); }
+    catch { }
+});
 
 app.Run();

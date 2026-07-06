@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TestWithMe.Api.Data;
@@ -11,9 +12,11 @@ using TestWithMe.Api.Data;
 namespace TestWithMe.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260704172844_AddEnrollments")]
+    partial class AddEnrollments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -186,191 +189,6 @@ namespace TestWithMe.Api.Migrations
                     b.ToTable("progress", (string)null);
                 });
 
-            modelBuilder.Entity("TestWithMe.Api.Models.PromoCode", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("code");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
-                    b.Property<int>("MaxUses")
-                        .HasColumnType("integer")
-                        .HasColumnName("max_uses");
-
-                    b.Property<Guid?>("ModuleId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("module_id");
-
-                    b.Property<int>("UsedCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("used_count");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("promo_codes", (string)null);
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.Question", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("CorrectAnswer")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("correct_answer");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Explanation")
-                        .HasColumnType("text")
-                        .HasColumnName("explanation");
-
-                    b.Property<string>("OptionA")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("option_a");
-
-                    b.Property<string>("OptionB")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("option_b");
-
-                    b.Property<string>("OptionC")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("option_c");
-
-                    b.Property<string>("OptionD")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("option_d");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("integer")
-                        .HasColumnName("order_index");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("text");
-
-                    b.Property<Guid>("TopicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("topic_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TopicId");
-
-                    b.ToTable("questions", (string)null);
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.QuizAnswerDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AttemptId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("attempt_id");
-
-                    b.Property<string>("CorrectAnswer")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("correct_answer");
-
-                    b.Property<string>("GivenAnswer")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("given_answer");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_correct");
-
-                    b.Property<Guid>("QuestionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("question_id");
-
-                    b.Property<string>("QuestionText")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("question_text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttemptId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("quiz_answer_details", (string)null);
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.QuizAttempt", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("AttemptedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("attempted_at");
-
-                    b.Property<bool>("Passed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("passed");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("integer")
-                        .HasColumnName("score");
-
-                    b.Property<Guid>("TopicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("topic_id");
-
-                    b.Property<int>("Total")
-                        .HasColumnType("integer")
-                        .HasColumnName("total");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TopicId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("quiz_attempts", (string)null);
-                });
-
             modelBuilder.Entity("TestWithMe.Api.Models.Topic", b =>
                 {
                     b.Property<Guid>("Id")
@@ -523,65 +341,6 @@ namespace TestWithMe.Api.Migrations
 
                     b.HasOne("TestWithMe.Api.Models.User", "User")
                         .WithMany("ProgressEntries")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Topic");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.PromoCode", b =>
-                {
-                    b.HasOne("TestWithMe.Api.Models.Module", "Module")
-                        .WithMany()
-                        .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Module");
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.Question", b =>
-                {
-                    b.HasOne("TestWithMe.Api.Models.Topic", "Topic")
-                        .WithMany()
-                        .HasForeignKey("TopicId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Topic");
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.QuizAnswerDetail", b =>
-                {
-                    b.HasOne("TestWithMe.Api.Models.QuizAttempt", "Attempt")
-                        .WithMany()
-                        .HasForeignKey("AttemptId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TestWithMe.Api.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attempt");
-
-                    b.Navigation("Question");
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.QuizAttempt", b =>
-                {
-                    b.HasOne("TestWithMe.Api.Models.Topic", "Topic")
-                        .WithMany()
-                        .HasForeignKey("TopicId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TestWithMe.Api.Models.User", "User")
-                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

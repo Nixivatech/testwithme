@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-function Logo({ onClick }: { onClick?: () => void }) {
+function Logo({ to, onClick }: { to: string; onClick?: () => void }) {
   return (
-    <Link to="/" className="flex items-center gap-2.5" onClick={onClick}>
+    <Link to={to} className="flex items-center gap-2.5" onClick={onClick}>
       <div className="w-8 h-8 rounded-xl bg-brand flex items-center justify-center flex-shrink-0">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
           <circle cx="7.5" cy="7.5" r="5" stroke="white" strokeWidth="2" />
@@ -36,7 +36,7 @@ export default function Navbar() {
     <nav className="bg-navy border-b border-white/10 sticky top-0 z-50">
       {/* Inner constrained to max-w-5xl so it aligns with page content */}
       <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
-        <Logo onClick={close} />
+        <Logo to={user ? '/dashboard' : '/'} onClick={close} />
 
         {/* Desktop links */}
         {user ? (

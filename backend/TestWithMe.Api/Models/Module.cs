@@ -9,6 +9,8 @@ public class Module
     public int OrderIndex { get; set; }
     public bool IsPro { get; set; }
     public bool IsPublished { get; set; }
+    public decimal? Price { get; set; }
+    public string? Features { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 
