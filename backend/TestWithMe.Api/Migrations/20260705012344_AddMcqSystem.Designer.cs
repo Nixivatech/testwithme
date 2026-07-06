@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TestWithMe.Api.Data;
@@ -11,9 +12,11 @@ using TestWithMe.Api.Data;
 namespace TestWithMe.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260705012344_AddMcqSystem")]
+    partial class AddMcqSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -288,49 +291,6 @@ namespace TestWithMe.Api.Migrations
                     b.ToTable("questions", (string)null);
                 });
 
-            modelBuilder.Entity("TestWithMe.Api.Models.QuizAnswerDetail", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("AttemptId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("attempt_id");
-
-                    b.Property<string>("CorrectAnswer")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("correct_answer");
-
-                    b.Property<string>("GivenAnswer")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("given_answer");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_correct");
-
-                    b.Property<Guid>("QuestionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("question_id");
-
-                    b.Property<string>("QuestionText")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("question_text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttemptId");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("quiz_answer_details", (string)null);
-                });
-
             modelBuilder.Entity("TestWithMe.Api.Models.QuizAttempt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -551,25 +511,6 @@ namespace TestWithMe.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Topic");
-                });
-
-            modelBuilder.Entity("TestWithMe.Api.Models.QuizAnswerDetail", b =>
-                {
-                    b.HasOne("TestWithMe.Api.Models.QuizAttempt", "Attempt")
-                        .WithMany()
-                        .HasForeignKey("AttemptId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TestWithMe.Api.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attempt");
-
-                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("TestWithMe.Api.Models.QuizAttempt", b =>

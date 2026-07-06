@@ -9,7 +9,7 @@ namespace TestWithMe.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(AppDbContext db, IGoogleAuthService googleAuth, IJwtService jwt) : ControllerBase
+public class AuthController(AppDbContext db, IGoogleAuthService googleAuth, IJwtService jwt, IEmailService email) : ControllerBase
 {
     [HttpPost("google")]
     public async Task<ActionResult<AuthResponse>> Google([FromBody] GoogleLoginRequest request)
@@ -41,6 +41,7 @@ public class AuthController(AppDbContext db, IGoogleAuthService googleAuth, IJwt
                 UpdatedAt = now
             };
             db.Users.Add(user);
+            _ = email.SendNewUserAlertAsync(user.Name, user.Email);
         }
         else
         {

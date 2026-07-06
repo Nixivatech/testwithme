@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -19,6 +19,7 @@ export default function GoogleSignInButton() {
   const ref = useRef<HTMLDivElement>(null)
   const { loginWithGoogleIdToken } = useAuth()
   const navigate = useNavigate()
+  const [signingIn, setSigningIn] = useState(false)
 
   useEffect(() => {
     const renderButton = () => {
@@ -27,8 +28,13 @@ export default function GoogleSignInButton() {
       window.google.accounts.id.initialize({
         client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
         callback: async (response) => {
-          await loginWithGoogleIdToken(response.credential)
-          navigate('/dashboard')
+          setSigningIn(true)
+          try {
+            await loginWithGoogleIdToken(response.credential)
+            navigate('/dashboard')
+          } catch {
+            setSigningIn(false)
+          }
         },
       })
 
@@ -48,6 +54,15 @@ export default function GoogleSignInButton() {
 
     return () => clearInterval(interval)
   }, [loginWithGoogleIdToken, navigate])
+
+  if (signingIn) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-2">
+        <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-slate-400">Signing you in…</p>
+      </div>
+    )
+  }
 
   return <div ref={ref} />
 }

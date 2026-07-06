@@ -17,6 +17,8 @@ export interface ModuleSummary {
   isPro: boolean
   topicCount: number
   completedTopicCount: number
+  price: number | null
+  features: string | null
 }
 
 export interface TopicSummary {
@@ -34,6 +36,8 @@ export interface ModuleDetail {
   description: string | null
   isPro: boolean
   topics: TopicSummary[]
+  price: number | null
+  features: string | null
 }
 
 export interface TopicDetail {
@@ -44,6 +48,10 @@ export interface TopicDetail {
   isCompleted: boolean
   moduleId: string
   moduleTitle: string
+  nextTopicSlug: string | null
+  prevTopicSlug: string | null
+  topicIndex: number
+  totalTopics: number
 }
 
 export interface Certificate {
@@ -56,4 +64,85 @@ export interface Certificate {
 export interface CertificateVerification {
   isValid: boolean
   certificate: Certificate | null
+}
+
+export interface Question {
+  id: string
+  text: string
+  optionA: string
+  optionB: string
+  optionC: string
+  optionD: string
+}
+
+export interface QuestionResult {
+  questionId: string
+  text: string
+  yourAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+  explanation: string | null
+}
+
+export interface QuizResult {
+  score: number
+  total: number
+  passed: boolean
+  results: QuestionResult[]
+  certificateCode: string | null
+}
+
+export interface SessionAnswer {
+  questionId: string
+  questionText: string
+  givenAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+}
+
+export interface QuizSession {
+  attemptId: string
+  score: number
+  total: number
+  passed: boolean
+  attemptedAt: string
+  answers: SessionAnswer[]
+}
+
+export interface FullTestQuestion {
+  id: string
+  topicId: string
+  topicTitle: string
+  moduleTitle: string
+  text: string
+  optionA: string
+  optionB: string
+  optionC: string
+  optionD: string
+}
+
+export interface FullTestQuestionResult {
+  questionId: string
+  text: string
+  yourAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+  explanation: string | null
+}
+
+export interface FullTestTopicResult {
+  topicId: string
+  topicTitle: string
+  moduleTitle: string
+  score: number
+  total: number
+  passed: boolean
+  questions: FullTestQuestionResult[]
+}
+
+export interface FullTestResult {
+  totalScore: number
+  totalQuestions: number
+  topics: FullTestTopicResult[]
+  takenAt: string
 }
