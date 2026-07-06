@@ -35,6 +35,20 @@ export default function Admin() {
   const [promoModuleId, setPromoModuleId] = useState('')
   const [promoMaxUses, setPromoMaxUses] = useState('1')
   const [promoSubmitting, setPromoSubmitting] = useState(false)
+  const [flushing, setFlushing] = useState(false)
+
+  async function handleFlushTestUsers() {
+    if (!window.confirm('Delete all non-admin users and their data? This cannot be undone.')) return
+    setFlushing(true)
+    try {
+      const res = await api.delete<{ message: string }>('/api/admin/flush-test-users')
+      alert(res.data.message)
+    } catch {
+      alert('Flush failed.')
+    } finally {
+      setFlushing(false)
+    }
+  }
 
   function loadModules() {
     api.get<ModuleSummary[]>('/api/modules').then((res) => setModules(res.data))
@@ -247,6 +261,19 @@ export default function Admin() {
             {isSubmitting ? 'Creating…' : 'Create Module'}
           </button>
         </form>
+
+        {/* Dev tools */}
+        <div className="mt-10 mb-8 border border-red-500/20 rounded-2xl p-5">
+          <p className="text-[11px] font-semibold text-red-400 uppercase tracking-widest mb-1">Dev Tools</p>
+          <p className="text-xs text-slate-500 mb-4">Destructive actions for testing only. Admin accounts are preserved.</p>
+          <button
+            onClick={handleFlushTestUsers}
+            disabled={flushing}
+            className="bg-red-600/80 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+          >
+            {flushing ? 'Flushing…' : 'Flush Test Users'}
+          </button>
+        </div>
 
         {/* Existing modules */}
         <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3">Existing Modules</p>
