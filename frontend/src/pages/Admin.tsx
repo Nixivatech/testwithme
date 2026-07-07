@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../lib/api'
 import type { ModuleSummary } from '../types'
 
@@ -40,6 +40,17 @@ export default function Admin() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [userFilter, setUserFilter] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   function loadFlushUsers() {
     api.get<{ id: string; name: string; email: string }[]>('/api/admin/users')
@@ -299,7 +310,7 @@ export default function Admin() {
           <p className="text-xs text-slate-500 mb-4">Clear user data for testing. Accounts are preserved.</p>
 
           {/* Multi-select dropdown */}
-          <div className="relative mb-3">
+          <div className="relative mb-3" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => { setDropdownOpen((o) => !o); loadFlushUsers() }}
