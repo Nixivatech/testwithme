@@ -36,13 +36,44 @@ export default function Admin() {
   const [promoMaxUses, setPromoMaxUses] = useState('1')
   const [promoSubmitting, setPromoSubmitting] = useState(false)
   const [flushing, setFlushing] = useState(false)
+  const [flushUsers, setFlushUsers] = useState<{ id: string; name: string; email: string }[]>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [userFilter, setUserFilter] = useState('')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
-  async function handleFlushTestUsers() {
-    if (!window.confirm('Delete all non-admin users and their data? This cannot be undone.')) return
+  function loadFlushUsers() {
+    api.get<{ id: string; name: string; email: string }[]>('/api/admin/users')
+      .then((res) => setFlushUsers(res.data))
+      .catch(() => {})
+  }
+
+  const filteredUsers = flushUsers.filter(
+    (u) =>
+      u.email.toLowerCase().includes(userFilter.toLowerCase()) ||
+      u.name.toLowerCase().includes(userFilter.toLowerCase())
+  )
+
+  function toggleUser(id: string) {
+    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id])
+  }
+
+  function toggleSelectAll() {
+    if (selectedIds.length === filteredUsers.length && filteredUsers.length > 0) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredUsers.map((u) => u.id))
+    }
+  }
+
+  async function handleFlushUserData() {
+    if (selectedIds.length === 0) return
+    if (!window.confirm(`Clear data for ${selectedIds.length} user(s)? Their accounts are kept.`)) return
     setFlushing(true)
     try {
-      const res = await api.delete<{ message: string }>('/api/admin/flush-test-users')
+      const res = await api.delete<{ message: string }>('/api/admin/flush-user-data', { data: { userIds: selectedIds } })
       alert(res.data.message)
+      setSelectedIds([])
+      loadFlushUsers()
     } catch {
       alert('Flush failed.')
     } finally {
@@ -58,7 +89,7 @@ export default function Admin() {
     api.get<PromoCode[]>('/api/promos').then((res) => setPromos(res.data)).catch(() => {})
   }
 
-  useEffect(() => { loadModules(); loadPromos() }, [])
+  useEffect(() => { loadModules(); loadPromos(); loadFlushUsers() }, [])
 
   async function handleCreatePromo(e: FormEvent) {
     e.preventDefault()
@@ -265,13 +296,89 @@ export default function Admin() {
         {/* Dev tools */}
         <div className="mt-10 mb-8 border border-red-500/20 rounded-2xl p-5">
           <p className="text-[11px] font-semibold text-red-400 uppercase tracking-widest mb-1">Dev Tools</p>
-          <p className="text-xs text-slate-500 mb-4">Destructive actions for testing only. Admin accounts are preserved.</p>
+          <p className="text-xs text-slate-500 mb-4">Clear user data for testing. Accounts are preserved.</p>
+
+          {/* Multi-select dropdown */}
+          <div className="relative mb-3">
+            <button
+              type="button"
+              onClick={() => { setDropdownOpen((o) => !o); loadFlushUsers() }}
+              className="w-full flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white hover:border-white/20 transition-colors"
+            >
+              <span className="text-slate-300">
+                {selectedIds.length === 0
+                  ? 'Select users…'
+                  : `${selectedIds.length} user${selectedIds.length > 1 ? 's' : ''} selected`}
+              </span>
+              <span className="text-slate-500 text-xs">{dropdownOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-[#1a2235] border border-white/10 rounded-xl shadow-xl overflow-hidden">
+                {/* Filter input */}
+                <div className="p-2 border-b border-white/10">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={userFilter}
+                    onChange={(e) => setUserFilter(e.target.value)}
+                    placeholder="Filter by name or email…"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-brand"
+                  />
+                </div>
+
+                {/* Select All */}
+                <label className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 cursor-pointer border-b border-white/10">
+                  <input
+                    type="checkbox"
+                    checked={filteredUsers.length > 0 && selectedIds.length === filteredUsers.length}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 accent-brand"
+                  />
+                  <span className="text-sm font-semibold text-slate-300">Select All ({filteredUsers.length})</span>
+                </label>
+
+                {/* User list */}
+                <div className="max-h-52 overflow-y-auto">
+                  {filteredUsers.length === 0 ? (
+                    <p className="text-xs text-slate-500 px-4 py-3">No users found.</p>
+                  ) : (
+                    filteredUsers.map((u) => (
+                      <label key={u.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(u.id)}
+                          onChange={() => toggleUser(u.id)}
+                          className="w-4 h-4 accent-brand flex-shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <p className="text-sm text-white truncate">{u.name}</p>
+                          <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
+
+                <div className="p-2 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setDropdownOpen(false)}
+                    className="w-full text-xs text-slate-400 hover:text-white py-1 transition-colors"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <button
-            onClick={handleFlushTestUsers}
-            disabled={flushing}
-            className="bg-red-600/80 hover:bg-red-600 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+            onClick={handleFlushUserData}
+            disabled={flushing || selectedIds.length === 0}
+            className="bg-red-600/80 hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
           >
-            {flushing ? 'Flushing…' : 'Flush Test Users'}
+            {flushing ? 'Flushing…' : `Flush Data${selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}`}
           </button>
         </div>
 

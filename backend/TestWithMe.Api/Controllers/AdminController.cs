@@ -11,27 +11,32 @@ namespace TestWithMe.Api.Controllers;
 [Authorize(Roles = nameof(UserRole.Admin))]
 public class AdminController(AppDbContext db) : ControllerBase
 {
-    [HttpDelete("flush-test-users")]
-    public async Task<IActionResult> FlushTestUsers()
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
     {
-        var adminEmails = await db.Users
-            .Where(u => u.Role == UserRole.Admin)
-            .Select(u => u.Email)
+        var users = await db.Users
+            .Where(u => u.Role != UserRole.Admin)
+            .OrderBy(u => u.CreatedAt)
+            .Select(u => new { u.Id, u.Name, u.Email })
             .ToListAsync();
+        return Ok(users);
+    }
 
-        // Delete all non-admin users (cascade removes their enrollments, progress, quiz data, certificates)
-        var nonAdmins = await db.Users.Where(u => u.Role != UserRole.Admin).ToListAsync();
-        db.Users.RemoveRange(nonAdmins);
+    [HttpDelete("flush-user-data")]
+    public async Task<IActionResult> FlushUserData([FromBody] FlushUserDataRequest request)
+    {
+        if (request.UserIds == null || request.UserIds.Count == 0)
+            return BadRequest(new { message = "No users selected." });
 
-        // Clear admin's own transactional data so they start fresh too
-        var adminIds = await db.Users.Where(u => u.Role == UserRole.Admin).Select(u => u.Id).ToListAsync();
-        await db.Enrollments.Where(e => adminIds.Contains(e.UserId)).ExecuteDeleteAsync();
-        await db.ProgressEntries.Where(p => adminIds.Contains(p.UserId)).ExecuteDeleteAsync();
-        await db.QuizAttempts.Where(q => adminIds.Contains(q.UserId)).ExecuteDeleteAsync();
-        await db.Certificates.Where(c => adminIds.Contains(c.UserId)).ExecuteDeleteAsync();
+        var ids = request.UserIds;
 
-        await db.SaveChangesAsync();
+        await db.QuizAttempts.Where(q => ids.Contains(q.UserId)).ExecuteDeleteAsync();
+        await db.ProgressEntries.Where(p => ids.Contains(p.UserId)).ExecuteDeleteAsync();
+        await db.Enrollments.Where(e => ids.Contains(e.UserId)).ExecuteDeleteAsync();
+        await db.Certificates.Where(c => ids.Contains(c.UserId)).ExecuteDeleteAsync();
 
-        return Ok(new { message = $"Flushed {nonAdmins.Count} non-admin user(s). Admin accounts preserved." });
+        return Ok(new { message = $"Flushed data for {ids.Count} user(s). Accounts preserved." });
     }
 }
+
+public record FlushUserDataRequest(List<Guid> UserIds);
