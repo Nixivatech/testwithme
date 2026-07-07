@@ -2,15 +2,23 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
+import { useEnrollment } from '../context/EnrollmentContext'
 import type { User } from '../types'
 
 const PROFESSIONAL_OPTIONS = ['Student', 'Working Professional', 'Learner']
 
+function isPhoneMandatory(createdAt: string, enrolledCount: number): boolean {
+  const daysSinceRegistration = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24)
+  return daysSinceRegistration > 7 || enrolledCount > 0
+}
+
 export default function CompleteProfile() {
   const { user, setUser } = useAuth()
+  const { enrolledModuleIds } = useEnrollment()
   const navigate = useNavigate()
 
   const isEditing = user?.isProfileComplete ?? false
+  const mandatory = !isEditing && user ? isPhoneMandatory(user.createdAt, enrolledModuleIds.length) : false
 
   const [name, setName] = useState(user?.name ?? '')
   const [phone, setPhone] = useState(user?.phone ?? '')
@@ -38,9 +46,15 @@ export default function CompleteProfile() {
     <div className="min-h-screen bg-navy flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold text-white mb-1">{isEditing ? 'Edit Profile' : 'Complete your profile'}</h1>
-        <p className="text-sm text-slate-400 mb-8">{isEditing ? 'Update your details below.' : 'Just a few more details before you get started.'}</p>
+        <p className="text-sm text-slate-400 mb-2">{isEditing ? 'Update your details below.' : 'Just a few more details before you get started.'}</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {mandatory && (
+          <p className="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-xl px-4 py-2.5 mb-6">
+            Phone number is required — you've been with us for a while or have enrolled in a module.
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div>
             <label className="block text-xs text-slate-400 mb-1">Full Name</label>
             <input
@@ -53,13 +67,15 @@ export default function CompleteProfile() {
           </div>
 
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Phone Number</label>
+            <label className="block text-xs text-slate-400 mb-1">
+              Phone Number {mandatory && <span className="text-amber-400">*</span>}
+            </label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+91 9876543210"
-              required
+              required={mandatory}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-brand"
             />
           </div>
@@ -94,7 +110,7 @@ export default function CompleteProfile() {
             {submitting ? 'Saving…' : isEditing ? 'Save Changes' : 'Continue to Dashboard'}
           </button>
 
-          {!isEditing && (
+          {!isEditing && !mandatory && (
             <button
               type="button"
               onClick={() => { sessionStorage.setItem('profileSkipped', '1'); navigate('/dashboard') }}
