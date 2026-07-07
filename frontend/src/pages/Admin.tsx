@@ -289,12 +289,12 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-navy text-white">
-      <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 flex flex-col lg:flex-row gap-6">
+      <div className="max-w-5xl mx-auto px-4 py-8 flex flex-row gap-6">
 
         {/* Sidebar */}
-        <aside className="lg:w-48 flex-shrink-0">
+        <aside className="w-40 flex-shrink-0">
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3 px-1">Admin</p>
-          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
+          <nav className="flex flex-col gap-1">
             {MENU.map((item) => (
               <button
                 key={item.id}
