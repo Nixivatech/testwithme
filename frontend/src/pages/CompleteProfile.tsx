@@ -93,6 +93,16 @@ export default function CompleteProfile() {
           >
             {submitting ? 'Saving…' : isEditing ? 'Save Changes' : 'Continue to Dashboard'}
           </button>
+
+          {!isEditing && (
+            <button
+              type="button"
+              onClick={() => { sessionStorage.setItem('profileSkipped', '1'); navigate('/dashboard') }}
+              className="w-full text-sm text-slate-500 hover:text-slate-300 py-2 transition-colors"
+            >
+              Skip for now
+            </button>
+          )}
         </form>
       </div>
     </div>
