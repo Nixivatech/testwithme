@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
+import { useEnrollment } from '../context/EnrollmentContext'
 import type { ModuleSummary } from '../types'
 
 const HOW_IT_WORKS = [
@@ -12,6 +13,7 @@ const HOW_IT_WORKS = [
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const { isEnrolled } = useEnrollment()
   const [modules, setModules] = useState<ModuleSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -95,11 +97,11 @@ export default function Dashboard() {
         {/* How it works — 3 columns on desktop */}
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">How it works</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {HOW_IT_WORKS.map((step, i) => (
               <div
                 key={i}
-                className="flex sm:flex-col items-start sm:items-center sm:text-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 hover:border-brand/30 transition-colors"
+                className="flex lg:flex-col items-start lg:items-center lg:text-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 hover:border-brand/30 transition-colors"
               >
                 <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-brand/20 flex items-center justify-center text-xl">
                   {step.icon}
@@ -117,7 +119,7 @@ export default function Dashboard() {
         <div id="modules">
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">Learning Modules</p>
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {[1, 2, 3, 4].map((n) => (
                 <div key={n} className="h-28 rounded-xl bg-white/5 animate-pulse" />
               ))}
@@ -128,7 +130,7 @@ export default function Dashboard() {
               <p className="text-sm text-slate-400">No modules yet — check back soon!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {modules.map((m) => {
                 const pct = m.topicCount === 0 ? 0 : Math.round((m.completedTopicCount / m.topicCount) * 100)
                 const isComplete = pct === 100 && m.topicCount > 0
@@ -146,7 +148,9 @@ export default function Dashboard() {
                       <div className="flex gap-1.5 flex-shrink-0 ml-2">
                         {isComplete && <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2 py-0.5 rounded-full">Done ✓</span>}
                         {isStarted && <span className="text-[10px] font-semibold bg-brand/20 text-brand-light px-2 py-0.5 rounded-full">In Progress</span>}
-                        {m.price != null && <span className="text-[10px] font-bold bg-brand/20 text-brand-light px-2 py-0.5 rounded-full">₹{m.price}</span>}
+                        {m.price != null && isEnrolled(m.id) && (
+                          <span className="text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Enrolled</span>
+                        )}
                         {m.isPro && !m.price && <span className="text-[10px] font-semibold bg-amber-400/20 text-amber-400 px-2 py-0.5 rounded-full">Pro</span>}
                       </div>
                     </div>

@@ -15,6 +15,7 @@ interface EnrollmentContextValue {
   getExpiresAt: (moduleId: string) => Date | null
   enroll: (moduleId: string) => Promise<void>
   redeemPromo: (code: string, moduleId: string) => Promise<string>
+  refresh: () => Promise<void>
   isLoading: boolean
 }
 
@@ -65,8 +66,13 @@ export function EnrollmentProvider({ children }: { children: ReactNode }) {
     return res.data.message
   }
 
+  async function refresh() {
+    const res = await api.get<EnrollmentInfo[]>('/api/enrollments/mine')
+    setEnrollments(res.data)
+  }
+
   return (
-    <EnrollmentContext.Provider value={{ enrolledModuleIds, expiredModuleIds, isEnrolled, isExpired, getExpiresAt, enroll, redeemPromo, isLoading }}>
+    <EnrollmentContext.Provider value={{ enrolledModuleIds, expiredModuleIds, isEnrolled, isExpired, getExpiresAt, enroll, redeemPromo, refresh, isLoading }}>
       {children}
     </EnrollmentContext.Provider>
   )

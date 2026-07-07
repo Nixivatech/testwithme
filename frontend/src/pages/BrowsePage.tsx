@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import { useEnrollment } from '../context/EnrollmentContext'
 import type { ModuleDetail } from '../types'
 
 type Filter = 'all' | 'free' | 'pro'
@@ -11,6 +12,7 @@ export default function BrowsePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('all')
   const [expandedTopics, setExpandedTopics] = useState<Record<string, boolean>>({})
+  const { isEnrolled } = useEnrollment()
 
   useEffect(() => {
     api.get<ModuleDetail[]>('/api/modules/all-details')
@@ -68,7 +70,7 @@ export default function BrowsePage() {
 
         {/* Module cards */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[1, 2, 3, 4].map((n) => <div key={n} className="h-80 rounded-2xl bg-white/5 animate-pulse" />)}
           </div>
         ) : filtered.length === 0 ? (
@@ -77,11 +79,12 @@ export default function BrowsePage() {
             <p className="text-sm">No modules in this category yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             {filtered.map((m) => {
               const completedCount = m.topics.filter((t) => t.isCompleted).length
               const pct = m.topics.length === 0 ? 0 : Math.round((completedCount / m.topics.length) * 100)
               const isFree = !m.isPro && m.price == null
+              const isPurchased = !isFree && isEnrolled(m.id)
               const showTopics = expandedTopics[m.id] ?? false
               const featureList = m.features ? m.features.split('\n').filter(Boolean) : []
 
@@ -106,6 +109,8 @@ export default function BrowsePage() {
                     <h2 className="font-bold text-base text-white leading-snug">{m.title}</h2>
                     {isFree ? (
                       <span className="text-[10px] font-semibold bg-accent/20 text-accent px-2.5 py-1 rounded-full flex-shrink-0">Free</span>
+                    ) : isPurchased ? (
+                      <span className="text-[10px] font-semibold bg-green-500/20 text-green-400 px-2.5 py-1 rounded-full border border-green-500/30 flex-shrink-0">Enrolled</span>
                     ) : m.price != null ? (
                       <span className="text-[10px] font-semibold bg-brand/30 text-brand-light px-2.5 py-1 rounded-full border border-brand/30 flex-shrink-0">Paid</span>
                     ) : (
@@ -116,7 +121,7 @@ export default function BrowsePage() {
                   {/* Price */}
                   <div>
                     <p className="text-3xl font-bold text-white">
-                      {isFree ? 'Free' : m.price != null ? `₹${m.price}` : 'Pro Plan'}
+                      {isFree ? 'Free' : isPurchased ? 'Enrolled' : m.price != null ? `₹${m.price}` : 'Pro Plan'}
                     </p>
                     {m.description && (
                       <p className="text-xs text-slate-400 mt-1 leading-relaxed">{m.description}</p>

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { useEnrollment } from '../context/EnrollmentContext'
@@ -16,6 +16,8 @@ export default function CompleteProfile() {
   const { user, setUser } = useAuth()
   const { enrolledModuleIds } = useEnrollment()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTo = searchParams.get('redirect') ?? '/dashboard'
 
   const isEditing = user?.isProfileComplete ?? false
   const mandatory = !isEditing && user ? isPhoneMandatory(user.createdAt, enrolledModuleIds.length) : false
@@ -34,7 +36,7 @@ export default function CompleteProfile() {
     try {
       const res = await api.patch<User>('/api/users/profile', { name: name.trim(), phone: phone.trim(), professional })
       setUser(res.data)
-      navigate('/dashboard')
+      navigate(redirectTo)
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {

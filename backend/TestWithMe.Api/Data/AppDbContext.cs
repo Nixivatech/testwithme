@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Question> Questions => Set<Question>();
     public DbSet<QuizAttempt> QuizAttempts => Set<QuizAttempt>();
     public DbSet<QuizAnswerDetail> QuizAnswerDetails => Set<QuizAnswerDetail>();
+    public DbSet<PriceView> PriceViews => Set<PriceView>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -159,6 +160,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.AmountPaid).HasColumnName("amount_paid");
             e.Property(x => x.ExpiresAt).HasColumnName("expires_at");
             e.HasIndex(x => new { x.UserId, x.ModuleId }).IsUnique();
+            e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Module).WithMany().HasForeignKey(x => x.ModuleId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PriceView>(e =>
+        {
+            e.ToTable("price_views");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).HasColumnName("id");
+            e.Property(x => x.UserId).HasColumnName("user_id");
+            e.Property(x => x.ModuleId).HasColumnName("module_id");
+            e.Property(x => x.ViewedAt).HasColumnName("viewed_at");
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(x => x.Module).WithMany().HasForeignKey(x => x.ModuleId).OnDelete(DeleteBehavior.Cascade);
         });

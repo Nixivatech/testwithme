@@ -28,11 +28,17 @@ export default function TopicPage() {
     setQuizResult(null)
     setHistory([])
     setHistoryOpen(false)
-    api.get<TopicDetail>(`/api/modules/${moduleSlug}/topics/${topicSlug}`).then((res) => {
-      setTopic(res.data)
-      api.get<Question[]>(`/api/quiz/topics/${res.data.id}`).then((r) => setQuestions(r.data))
-      api.get<QuizSession[]>(`/api/quiz/history/${res.data.id}`).then((r) => setHistory(r.data))
-    })
+    api.get<TopicDetail>(`/api/modules/${moduleSlug}/topics/${topicSlug}`)
+      .then((res) => {
+        setTopic(res.data)
+        api.get<Question[]>(`/api/quiz/topics/${res.data.id}`).then((r) => setQuestions(r.data))
+        api.get<QuizSession[]>(`/api/quiz/history/${res.data.id}`).then((r) => setHistory(r.data))
+      })
+      .catch((err) => {
+        if (err.response?.status === 423) {
+          navigate(`/modules/${moduleSlug}`)
+        }
+      })
   }, [moduleSlug, topicSlug])
 
   async function handleSubmitQuiz() {

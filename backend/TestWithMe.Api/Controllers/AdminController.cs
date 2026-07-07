@@ -104,6 +104,28 @@ public class AdminController(AppDbContext db) : ControllerBase
         return Ok(users);
     }
 
+    [HttpGet("price-views")]
+    public async Task<IActionResult> GetPriceViews()
+    {
+        var views = await db.PriceViews
+            .Include(v => v.User)
+            .Include(v => v.Module)
+            .OrderByDescending(v => v.ViewedAt)
+            .Select(v => new
+            {
+                v.Id,
+                v.ViewedAt,
+                UserName = v.User!.Name,
+                UserEmail = v.User.Email,
+                UserAvatarUrl = v.User.AvatarUrl,
+                UserLastSeenAt = v.User.LastSeenAt,
+                ModuleTitle = v.Module!.Title,
+                ModulePrice = v.Module.Price
+            })
+            .ToListAsync();
+        return Ok(views);
+    }
+
     [HttpDelete("flush-user-data")]
     public async Task<IActionResult> FlushUserData([FromBody] FlushUserDataRequest request)
     {

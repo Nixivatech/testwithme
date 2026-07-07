@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../lib/api'
+import { useEnrollment } from '../context/EnrollmentContext'
 import type { ModuleSummary } from '../types'
 
-type Section = 'active-users' | 'total-users' | 'new-users' | 'premium-users' | 'free-users' | 'expiring-users' | 'expired-users' | 'promo-code' | 'new-module' | 'dev-tools' | 'existing-modules'
+type Section = 'active-users' | 'total-users' | 'new-users' | 'premium-users' | 'free-users' | 'expiring-users' | 'expired-users' | 'promo-code' | 'new-module' | 'dev-tools' | 'existing-modules' | 'price-views'
 
 const MENU: { id: Section; label: string; icon: string }[] = [
   { id: 'active-users',      label: 'Active Users',     icon: '🟢' },
@@ -12,11 +13,18 @@ const MENU: { id: Section; label: string; icon: string }[] = [
   { id: 'free-users',        label: 'Free Users',       icon: '🎓' },
   { id: 'expiring-users',    label: 'Expiring Soon',    icon: '⏳' },
   { id: 'expired-users',     label: 'Expired',          icon: '🔴' },
+  { id: 'price-views',       label: 'Price Visited',    icon: '👁️' },
   { id: 'promo-code',        label: 'Promo Code',       icon: '🎟️' },
   { id: 'new-module',        label: 'New Module',       icon: '➕' },
   { id: 'dev-tools',         label: 'Dev Tools',        icon: '🛠️' },
   { id: 'existing-modules',  label: 'Existing Modules', icon: '📚' },
 ]
+
+interface PriceViewEntry {
+  id: string; viewedAt: string
+  userName: string; userEmail: string; userAvatarUrl: string | null; userLastSeenAt: string | null
+  moduleTitle: string; modulePrice: number
+}
 
 interface ActiveUser {
   id: string; name: string; email: string
@@ -80,12 +88,7 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
       </div>
       {users.length === 0 ? <p className="text-sm text-slate-500">No users found.</p> : (
         <div className="overflow-x-auto rounded-xl border border-white/10">
-          <table className="w-full text-sm table-fixed">
-            <colgroup>
-              <col style={{width:'22%'}} /><col style={{width:'34%'}} />
-              <col style={{width:'16%'}} /><col style={{width:'8%'}} />
-              <col style={{width:'10%'}} /><col style={{width:'10%'}} />
-            </colgroup>
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">
                 {['Name','Email ID','Mobile','Role','Joined','Last Seen'].map(h => (
@@ -121,7 +124,7 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
                   </td>
                   <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}</td>
                   <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
-                    {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : <span className="text-slate-600">—</span>}
+                    {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) : <span className="text-slate-600">—</span>}
                   </td>
                 </tr>
               ))}
@@ -134,6 +137,7 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
 }
 
 export default function Admin() {
+  const { refresh: refreshEnrollments } = useEnrollment()
   const [section, setSection] = useState<Section>('active-users')
 
   // Active users
@@ -148,6 +152,8 @@ export default function Admin() {
   // Expiring / Expired users
   const [expiringUsers, setExpiringUsers] = useState<TotalUser[]>([])
   const [expiredUsers, setExpiredUsers] = useState<TotalUser[]>([])
+  // Price views
+  const [priceViews, setPriceViews] = useState<PriceViewEntry[]>([])
   // Modules
   const [modules, setModules] = useState<ModuleSummary[]>([])
   // Promos
@@ -194,6 +200,7 @@ export default function Admin() {
     if (section === 'free-users') loadFreeUsers()
     if (section === 'expiring-users') loadExpiringUsers()
     if (section === 'expired-users') loadExpiredUsers()
+    if (section === 'price-views') loadPriceViews()
     if (section === 'promo-code') { loadPromos(); loadModules() }
     if (section === 'new-module') loadModules()
     if (section === 'dev-tools') loadFlushUsers()
@@ -230,6 +237,9 @@ export default function Admin() {
   }
   function loadFlushUsers() {
     api.get<{ id: string; name: string; email: string }[]>('/api/admin/users').then((r) => setFlushUsers(r.data)).catch(() => {})
+  }
+  function loadPriceViews() {
+    api.get<PriceViewEntry[]>('/api/admin/price-views').then((r) => setPriceViews(r.data)).catch(() => {})
   }
 
   // Promo
@@ -272,19 +282,19 @@ export default function Admin() {
     try {
       const res = await api.delete<{ message: string }>('/api/admin/flush-user-data', { data: { userIds: selectedIds } })
       alert(res.data.message)
-      setSelectedIds([]); loadFlushUsers()
+      setSelectedIds([]); loadFlushUsers(); refreshEnrollments()
     } catch { alert('Flush failed.') }
     finally { setFlushing(false) }
   }
 
   return (
     <div className="min-h-screen bg-navy text-white">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row gap-6">
+      <div className="max-w-5xl mx-auto px-4 lg:px-6 py-8 flex flex-col lg:flex-row gap-6">
 
         {/* Sidebar */}
-        <aside className="sm:w-48 flex-shrink-0">
+        <aside className="lg:w-48 flex-shrink-0">
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3 px-1">Admin</p>
-          <nav className="flex sm:flex-col gap-1 overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0">
+          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
             {MENU.map((item) => (
               <button
                 key={item.id}
@@ -347,15 +357,7 @@ export default function Admin() {
                 <p className="text-sm text-slate-500">No users yet.</p>
               ) : (
                 <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="w-full text-sm table-fixed">
-                    <colgroup>
-                      <col style={{width:'22%'}} />
-                      <col style={{width:'34%'}} />
-                      <col style={{width:'16%'}} />
-                      <col style={{width:'8%'}} />
-                      <col style={{width:'10%'}} />
-                      <col style={{width:'10%'}} />
-                    </colgroup>
+                  <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/10 bg-white/5">
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Name</th>
@@ -408,7 +410,7 @@ export default function Admin() {
                             {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
                           </td>
                           <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
-                            {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : <span className="text-slate-600">—</span>}
+                            {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) : <span className="text-slate-600">—</span>}
                           </td>
                         </tr>
                       ))}
@@ -433,6 +435,56 @@ export default function Admin() {
 
           {/* Expired */}
           {section === 'expired-users' && <UserTable users={expiredUsers} title="Expired Users" subtitle="3-month access ended" filename="expired-users.csv" />}
+
+          {/* Price Visited Users */}
+          {section === 'price-views' && (
+            <div>
+              <h2 className="text-lg font-bold mb-4">Price Visited Users <span className="text-slate-500 font-normal text-sm">({priceViews.length})</span></h2>
+              {priceViews.length === 0 ? (
+                <p className="text-sm text-slate-500">No price page visits yet.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-white/10">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10 bg-white/5">
+                        {['User', 'Email', 'Module', 'Price', 'Last Seen', 'Visited At'].map(h => (
+                          <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {priceViews.map((v, i) => (
+                        <tr key={v.id} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i === priceViews.length - 1 ? 'border-b-0' : ''}`}>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <Avatar url={v.userAvatarUrl} name={v.userName} size={7} />
+                              <span className="text-white font-medium truncate">{v.userName}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-1.5 group">
+                              <span className="text-slate-400 truncate text-xs">{v.userEmail}</span>
+                              <button type="button" onClick={() => navigator.clipboard.writeText(v.userEmail)} className="shrink-0 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-slate-300 transition-opacity"><CopyIcon /></button>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-slate-300 text-xs">{v.moduleTitle}</td>
+                          <td className="px-4 py-3">
+                            <span className="text-xs font-semibold text-brand-light">₹{v.modulePrice}</span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                            {v.userLastSeenAt ? new Date(v.userLastSeenAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) : <span className="text-slate-600">—</span>}
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                            {new Date(v.viewedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Promo Code */}
           {section === 'promo-code' && (

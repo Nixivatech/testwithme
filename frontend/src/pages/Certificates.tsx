@@ -21,7 +21,7 @@ export default function Certificates() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {[1, 2, 3].map((n) => <div key={n} className="h-28 rounded-xl bg-white/5 animate-pulse" />)}
           </div>
         ) : certificates.length === 0 ? (
@@ -33,7 +33,7 @@ export default function Certificates() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {certificates.map((c) => (
               <div key={c.certificateCode} className="bg-white/5 border border-white/10 rounded-xl p-5 flex flex-col gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-400/20 flex items-center justify-center text-xl">🏆</div>

@@ -136,12 +136,20 @@ public class ModulesController(AppDbContext db) : ControllerBase
         var siblings = await db.Topics
             .Where(t => t.ModuleId == topic.ModuleId && t.IsPublished)
             .OrderBy(t => t.OrderIndex)
-            .Select(t => t.Slug)
+            .Select(t => new { t.Id, t.Slug })
             .ToListAsync();
 
-        var idx = siblings.IndexOf(topic.Slug);
-        var prevSlug = idx > 0 ? siblings[idx - 1] : null;
-        var nextSlug = idx < siblings.Count - 1 ? siblings[idx + 1] : null;
+        var idx = siblings.FindIndex(s => s.Slug == topic.Slug);
+        var prevSlug = idx > 0 ? siblings[idx - 1].Slug : null;
+        var nextSlug = idx < siblings.Count - 1 ? siblings[idx + 1].Slug : null;
+
+        if (idx > 0)
+        {
+            var prevTopicId = siblings[idx - 1].Id;
+            var prevCompleted = await db.ProgressEntries.AnyAsync(p => p.UserId == userId && p.TopicId == prevTopicId);
+            if (!prevCompleted)
+                return StatusCode(423, new { message = "Complete the previous topic first." });
+        }
 
         return Ok(new TopicDetailDto(topic.Id, topic.Slug, topic.Title, topic.Content, isCompleted, topic.ModuleId, topic.Module!.Title, nextSlug, prevSlug, idx + 1, siblings.Count));
     }
