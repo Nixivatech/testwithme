@@ -233,6 +233,7 @@ export default function Admin() {
                       <tr className="border-b border-white/10 bg-white/5">
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Name</th>
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Email ID</th>
+                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Mobile</th>
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Role</th>
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Joined</th>
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Last Seen</th>
@@ -248,10 +249,16 @@ export default function Admin() {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-slate-400 truncate max-w-[160px]">{u.email}</td>
+                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                            {u.phone ?? <span className="text-slate-600">—</span>}
+                          </td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${u.role === 'Admin' ? 'bg-amber-400/10 text-amber-400' : 'bg-white/10 text-slate-400'}`}>
-                              {u.role}
-                            </span>
+                            {u.role === 'Admin'
+                              ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">Admin</span>
+                              : u.professional
+                                ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-slate-300">{u.professional}</span>
+                                : <span className="text-slate-600 text-xs">—</span>
+                            }
                           </td>
                           <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
                             {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
