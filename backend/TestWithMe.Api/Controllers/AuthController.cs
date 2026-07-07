@@ -57,5 +57,5 @@ public class AuthController(AppDbContext db, IGoogleAuthService googleAuth, IJwt
     }
 
     private static UserDto ToDto(User user) =>
-        new(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember);
+        new(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional);
 }

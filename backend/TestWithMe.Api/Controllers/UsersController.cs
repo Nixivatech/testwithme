@@ -22,6 +22,24 @@ public class UsersController(AppDbContext db) : ControllerBase
             return NotFound();
         }
 
-        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember));
+        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional));
+    }
+
+    [HttpPatch("profile")]
+    public async Task<ActionResult<UserDto>> UpdateProfile([FromBody] UpdateProfileRequest request)
+    {
+        var userId = User.GetUserId();
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user is null) return NotFound();
+
+        user.Name = request.Name.Trim();
+        user.Phone = request.Phone.Trim();
+        user.Professional = request.Professional.Trim();
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+        await db.SaveChangesAsync();
+
+        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional));
     }
 }
+
+public record UpdateProfileRequest(string Name, string Phone, string Professional);

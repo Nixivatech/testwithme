@@ -7,6 +7,9 @@ export interface User {
   avatarUrl: string | null
   role: UserRole
   isProMember: boolean
+  phone: string | null
+  professional: string | null
+  isProfileComplete: boolean
 }
 
 export interface ModuleSummary {

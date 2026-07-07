@@ -13,6 +13,7 @@ import Admin from './pages/Admin'
 import LogoConcepts from './pages/LogoConcepts'
 import BrowsePage from './pages/BrowsePage'
 import TestPage from './pages/TestPage'
+import CompleteProfile from './pages/CompleteProfile'
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/logo-concepts" element={<LogoConcepts />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/complete-profile" element={<CompleteProfile />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/browse" element={<BrowsePage />} />
           <Route path="/modules/:moduleSlug" element={<ModulePage />} />

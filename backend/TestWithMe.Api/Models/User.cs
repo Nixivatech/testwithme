@@ -15,6 +15,8 @@ public class User
     public string? AvatarUrl { get; set; }
     public UserRole Role { get; set; } = UserRole.Student;
     public bool IsProMember { get; set; }
+    public string? Phone { get; set; }
+    public string? Professional { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 

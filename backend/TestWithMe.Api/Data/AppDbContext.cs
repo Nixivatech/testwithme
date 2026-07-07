@@ -30,6 +30,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.AvatarUrl).HasColumnName("avatar_url");
             e.Property(x => x.Role).HasColumnName("role").HasConversion<string>().IsRequired();
             e.Property(x => x.IsProMember).HasColumnName("is_pro_member");
+            e.Property(x => x.Phone).HasColumnName("phone");
+            e.Property(x => x.Professional).HasColumnName("professional");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
             e.HasIndex(x => x.GoogleId).IsUnique();

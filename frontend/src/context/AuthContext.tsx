@@ -5,8 +5,9 @@ import type { User } from '../types'
 interface AuthContextValue {
   user: User | null
   isLoading: boolean
-  loginWithGoogleIdToken: (idToken: string) => Promise<void>
+  loginWithGoogleIdToken: (idToken: string) => Promise<{ isProfileComplete: boolean }>
   logout: () => void
+  setUser: (user: User) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.post('/api/auth/google', { idToken })
     setToken(res.data.token)
     setUser(res.data.user)
+    return { isProfileComplete: res.data.user.isProfileComplete as boolean }
   }
 
   function logout() {
@@ -39,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, loginWithGoogleIdToken, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, loginWithGoogleIdToken, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   )

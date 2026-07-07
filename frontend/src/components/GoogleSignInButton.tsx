@@ -30,8 +30,8 @@ export default function GoogleSignInButton() {
         callback: async (response) => {
           setSigningIn(true)
           try {
-            await loginWithGoogleIdToken(response.credential)
-            navigate('/dashboard')
+            const { isProfileComplete } = await loginWithGoogleIdToken(response.credential)
+            navigate(isProfileComplete ? '/dashboard' : '/complete-profile')
           } catch {
             setSigningIn(false)
           }
