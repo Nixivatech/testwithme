@@ -257,7 +257,7 @@ export default function Admin() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-slate-400 truncate" title={u.email}>{u.email}</div>
+                            <div className="text-slate-400 break-all">{u.email}</div>
                           </td>
                           <td className="px-4 py-3">
                             <div className="text-slate-400 truncate">{u.phone ?? <span className="text-slate-600">—</span>}</div>
