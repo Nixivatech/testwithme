@@ -27,8 +27,8 @@ public class AdminController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> GetUsers()
     {
         var users = await db.Users
-            .OrderBy(u => u.CreatedAt)
-            .Select(u => new { u.Id, u.Name, u.Email })
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.CreatedAt, u.LastSeenAt })
             .ToListAsync();
         return Ok(users);
     }
