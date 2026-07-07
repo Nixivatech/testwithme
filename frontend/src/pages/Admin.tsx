@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../lib/api'
 import { useEnrollment } from '../context/EnrollmentContext'
+import { useAuth } from '../context/AuthContext'
 import type { ModuleSummary } from '../types'
+import CertificateCard from '../components/CertificateCard'
 
-type Section = 'active-users' | 'total-users' | 'new-users' | 'premium-users' | 'free-users' | 'expiring-users' | 'expired-users' | 'promo-code' | 'new-module' | 'dev-tools' | 'existing-modules' | 'price-views'
+type Section = 'active-users' | 'total-users' | 'new-users' | 'premium-users' | 'free-users' | 'expiring-users' | 'expired-users' | 'promo-code' | 'new-module' | 'dev-tools' | 'existing-modules' | 'price-views' | 'cert-preview'
 
 const MENU: { id: Section; label: string; icon: string }[] = [
   { id: 'active-users',      label: 'Active Users',     icon: '🟢' },
@@ -18,6 +20,7 @@ const MENU: { id: Section; label: string; icon: string }[] = [
   { id: 'new-module',        label: 'New Module',       icon: '➕' },
   { id: 'dev-tools',         label: 'Dev Tools',        icon: '🛠️' },
   { id: 'existing-modules',  label: 'Existing Modules', icon: '📚' },
+  { id: 'cert-preview',      label: 'Certificate',      icon: '🏅' },
 ]
 
 interface PriceViewEntry {
@@ -62,7 +65,7 @@ const CopyIcon = () => (
   </svg>
 )
 
-function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; title: string; subtitle?: string; filename: string }) {
+function UserTable({ users, title, subtitle, filename, onRoleChange }: { users: TotalUser[]; title: string; subtitle?: string; filename: string; onRoleChange?: (id: string, newRole: string) => Promise<void> }) {
   function exportCsv() {
     const rows = [['Name','Email','Mobile','Role','Joined'], ...users.map(u => [u.name, u.email, u.phone ?? '', u.role === 'Admin' ? 'Admin' : u.professional ?? '', new Date(u.createdAt).toLocaleDateString('en-IN')])]
     const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
@@ -91,7 +94,7 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">
-                {['Name','Email ID','Mobile','Role','Joined','Last Seen'].map(h => (
+                {['Name','Email ID','Mobile','Role','Joined','Last Seen', ...(onRoleChange ? ['Access'] : [])].map(h => (
                   <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">{h}</th>
                 ))}
               </tr>
@@ -114,7 +117,7 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
                   <td className="px-4 py-3"><div className="text-slate-400 truncate">{u.phone ?? <span className="text-slate-600">—</span>}</div></td>
                   <td className="px-4 py-3">
                     {u.role === 'Admin'
-                      ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">A</span>
+                      ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">Admin</span>
                       : u.professional
                         ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-slate-300" title={u.professional}>
                             {u.professional === 'Student' ? 'S' : u.professional === 'Working Professional' ? 'W' : 'L'}
@@ -126,6 +129,20 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
                   <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
                     {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) : <span className="text-slate-600">—</span>}
                   </td>
+                  {onRoleChange && (
+                    <td className="px-4 py-3">
+                      {u.role === 'Admin'
+                        ? <button type="button" onClick={() => onRoleChange(u.id, 'Student')}
+                            className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                            Remove Admin
+                          </button>
+                        : <button type="button" onClick={() => onRoleChange(u.id, 'Admin')}
+                            className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors whitespace-nowrap">
+                            Make Admin
+                          </button>
+                      }
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
@@ -138,6 +155,7 @@ function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; t
 
 export default function Admin() {
   const { refresh: refreshEnrollments } = useEnrollment()
+  const { user } = useAuth()
   const [section, setSection] = useState<Section>('active-users')
 
   // Active users
@@ -351,74 +369,15 @@ export default function Admin() {
 
           {/* Total Users */}
           {section === 'total-users' && (
-            <div>
-              <h2 className="text-lg font-bold mb-4">Total Users <span className="text-slate-500 font-normal text-sm">({totalUsers.length})</span></h2>
-              {totalUsers.length === 0 ? (
-                <p className="text-sm text-slate-500">No users yet.</p>
-              ) : (
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-white/10 bg-white/5">
-                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Name</th>
-                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Email ID</th>
-                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Mobile</th>
-                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Role</th>
-                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Joined</th>
-                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Last Seen</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {totalUsers.map((u, i) => (
-                        <tr key={u.id} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i === totalUsers.length - 1 ? 'border-b-0' : ''}`}>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <Avatar url={u.avatarUrl} name={u.name} size={7} />
-                              <span className="text-white font-medium truncate">{u.name}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-1.5 min-w-0 group">
-                              <div className="text-slate-400 truncate" title={u.email}>{u.email}</div>
-                              <button
-                                type="button"
-                                onClick={() => navigator.clipboard.writeText(u.email)}
-                                className="shrink-0 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-slate-300 transition-opacity"
-                                title="Copy email"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                                </svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="text-slate-400 truncate">{u.phone ?? <span className="text-slate-600">—</span>}</div>
-                          </td>
-                          <td className="px-4 py-3">
-                            {u.role === 'Admin'
-                              ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">A</span>
-                              : u.professional
-                                ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-slate-300" title={u.professional}>
-                                    {u.professional === 'Student' ? 'S' : u.professional === 'Working Professional' ? 'W' : 'L'}
-                                  </span>
-                                : <span className="text-slate-600 text-xs">—</span>
-                            }
-                          </td>
-                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
-                            {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
-                          </td>
-                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
-                            {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true }) : <span className="text-slate-600">—</span>}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+            <UserTable
+              users={totalUsers}
+              title="Total Users"
+              filename="total-users.csv"
+              onRoleChange={async (id, newRole) => {
+                await api.patch(`/api/admin/users/${id}/role`, { role: newRole })
+                loadTotalUsers()
+              }}
+            />
           )}
 
           {/* New Users */}
@@ -635,6 +594,21 @@ export default function Admin() {
                   </div>
                 )
               }
+            </div>
+          )}
+
+          {/* Certificate Preview */}
+          {section === 'cert-preview' && (
+            <div>
+              <h2 className="text-lg font-bold mb-1">Certificate Preview</h2>
+              <p className="text-sm text-slate-400 mb-6">This is how the certificate looks when a user completes the module.</p>
+              <CertificateCard
+                studentName={user?.name ?? 'Student Name'}
+                moduleTitle="Java for Tester"
+                issuedAt={new Date().toISOString()}
+                certificateCode="ML-PREVIEW"
+                preview
+              />
             </div>
           )}
 

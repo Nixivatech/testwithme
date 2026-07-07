@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
 import type { Certificate } from '../types'
+import CertificateCard from '../components/CertificateCard'
 
 export default function Certificates() {
+  const { user } = useAuth()
   const [certificates, setCertificates] = useState<Certificate[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const isAdmin = user?.role === 'Admin'
 
   useEffect(() => {
     api.get<Certificate[]>('/api/certificates/mine').then((res) => setCertificates(res.data)).finally(() => setIsLoading(false))
@@ -25,12 +29,27 @@ export default function Certificates() {
             {[1, 2, 3].map((n) => <div key={n} className="h-28 rounded-xl bg-white/5 animate-pulse" />)}
           </div>
         ) : certificates.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-6xl mb-4">🏆</p>
-            <p className="text-sm text-slate-400 mb-4">No certificates yet. Finish a module to earn your first one!</p>
-            <Link to="/dashboard" className="inline-block text-xs font-semibold text-brand-light border border-brand/30 px-5 py-2.5 rounded-lg hover:bg-brand/10 transition-colors">
-              Go to Modules →
-            </Link>
+          <div className="text-center py-12">
+            {isAdmin ? (
+              <div>
+                <p className="text-sm text-slate-400 mb-6">No certificates issued yet. Here's the certificate design preview:</p>
+                <CertificateCard
+                  studentName={user?.name ?? 'Student Name'}
+                  moduleTitle="Java for Tester"
+                  issuedAt={new Date().toISOString()}
+                  certificateCode="ML-PREVIEW"
+                  preview
+                />
+              </div>
+            ) : (
+              <>
+                <p className="text-6xl mb-4">🏆</p>
+                <p className="text-sm text-slate-400 mb-4">No certificates yet. Finish a module to earn your first one!</p>
+                <Link to="/dashboard" className="inline-block text-xs font-semibold text-brand-light border border-brand/30 px-5 py-2.5 rounded-lg hover:bg-brand/10 transition-colors">
+                  Go to Modules →
+                </Link>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

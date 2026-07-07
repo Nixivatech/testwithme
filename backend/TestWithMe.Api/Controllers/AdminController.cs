@@ -126,6 +126,18 @@ public class AdminController(AppDbContext db) : ControllerBase
         return Ok(views);
     }
 
+    [HttpPatch("users/{id}/role")]
+    public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] UpdateUserRoleRequest request)
+    {
+        var user = await db.Users.FindAsync(id);
+        if (user == null) return NotFound(new { message = "User not found." });
+        if (!Enum.TryParse<UserRole>(request.Role, true, out var role))
+            return BadRequest(new { message = "Invalid role." });
+        user.Role = role;
+        await db.SaveChangesAsync();
+        return Ok(new { message = $"User is now {role}." });
+    }
+
     [HttpDelete("flush-user-data")]
     public async Task<IActionResult> FlushUserData([FromBody] FlushUserDataRequest request)
     {
@@ -148,3 +160,4 @@ public class AdminController(AppDbContext db) : ControllerBase
 }
 
 public record FlushUserDataRequest(List<Guid> UserIds);
+public record UpdateUserRoleRequest(string Role);

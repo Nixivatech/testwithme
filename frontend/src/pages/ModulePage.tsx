@@ -256,27 +256,14 @@ export default function ModulePage() {
             )}
 
             {hasTopics && (
-              <div className={`rounded-xl px-4 py-3 flex items-center justify-between gap-3 border ${
+              <div className={`rounded-xl px-4 py-3 border ${
                 isCompleted ? 'bg-amber-400/10 border-amber-400/20'
                 : notStarted ? 'bg-brand/10 border-brand/20'
                 : 'bg-white/5 border-white/10'
               }`}>
-                <div>
-                  {isCompleted && <p className="text-sm font-semibold text-amber-300">Module complete! 🏆</p>}
-                  {inProgress && <p className="text-sm font-semibold text-white">Keep going — {completedCount}/{module.topics.length} topics done</p>}
-                  {notStarted && <p className="text-sm font-semibold text-white">{purchased ? 'Ready to begin your learning journey?' : 'Pick up where you left off or start fresh.'}</p>}
-                </div>
-                <Link
-                  to={ctaTo}
-                  className={`flex-shrink-0 flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg transition-all active:scale-95 ${
-                    isCompleted ? 'bg-amber-400/20 text-amber-300 hover:bg-amber-400/30' : 'bg-brand text-white hover:bg-brand/90'
-                  }`}
-                >
-                  {ctaLabel}
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </Link>
+                {isCompleted && <p className="text-sm font-semibold text-amber-300">Module complete! 🏆</p>}
+                {inProgress && <p className="text-sm font-semibold text-white">Completed — {completedCount}/{module.topics.length}</p>}
+                {notStarted && <p className="text-sm font-semibold text-white">{purchased ? 'Ready to begin your learning journey?' : 'Start your first topic below.'}</p>}
               </div>
             )}
 
@@ -284,10 +271,10 @@ export default function ModulePage() {
               const isLocked = i > 0 && !module.topics[i - 1].isCompleted
               if (isLocked) {
                 return (
-                  <div key={t.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 opacity-50 cursor-not-allowed">
-                    <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs bg-white/10 text-slate-500">🔒</div>
-                    <span className="text-sm text-slate-500 flex-1">{t.title}</span>
-                    <span className="text-[10px] text-slate-600">Complete previous topic first</span>
+                  <div key={t.id} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 cursor-not-allowed">
+                    <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold bg-white/10 text-slate-400">{i + 1}</div>
+                    <span className="text-sm font-semibold text-white flex-1">{t.title}</span>
+                    <span className="text-slate-500 text-sm flex-shrink-0">🔒</span>
                   </div>
                 )
               }
@@ -300,7 +287,7 @@ export default function ModulePage() {
                   <div className={`w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold transition-colors ${t.isCompleted ? 'bg-accent text-white' : 'bg-white/10 text-slate-400 group-hover:bg-brand/20 group-hover:text-brand-light'}`}>
                     {t.isCompleted ? '✓' : i + 1}
                   </div>
-                  <span className="text-sm text-slate-200 group-hover:text-white transition-colors flex-1">{t.title}</span>
+                  <span className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors flex-1">{t.title}</span>
                   {!t.isCompleted && nextTopic?.slug === t.slug && !isCompleted && (
                     <span className="text-[10px] font-semibold text-brand-light bg-brand/10 px-2 py-0.5 rounded-full flex-shrink-0">
                       {notStarted ? 'Start here' : 'Next up'}
