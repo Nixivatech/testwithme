@@ -34,6 +34,15 @@ public class UsersController(AppDbContext db) : ControllerBase
         return Ok();
     }
 
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = User.GetUserId();
+        await db.Users.Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastSeenAt, (DateTimeOffset?)null));
+        return Ok();
+    }
+
     [HttpPatch("profile")]
     public async Task<ActionResult<UserDto>> UpdateProfile([FromBody] UpdateProfileRequest request)
     {
