@@ -228,7 +228,15 @@ export default function Admin() {
                 <p className="text-sm text-slate-500">No users yet.</p>
               ) : (
                 <div className="overflow-x-auto rounded-xl border border-white/10">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-sm table-fixed">
+                    <colgroup>
+                      <col style={{width:'20%'}} />
+                      <col style={{width:'26%'}} />
+                      <col style={{width:'16%'}} />
+                      <col style={{width:'16%'}} />
+                      <col style={{width:'11%'}} />
+                      <col style={{width:'11%'}} />
+                    </colgroup>
                     <thead>
                       <tr className="border-b border-white/10 bg-white/5">
                         <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Name</th>
@@ -243,14 +251,16 @@ export default function Admin() {
                       {totalUsers.map((u, i) => (
                         <tr key={u.id} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i === totalUsers.length - 1 ? 'border-b-0' : ''}`}>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-2 min-w-0">
                               <Avatar url={u.avatarUrl} name={u.name} size={7} />
-                              <span className="text-white font-medium truncate max-w-[120px]">{u.name}</span>
+                              <span className="text-white font-medium truncate">{u.name}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-slate-400 truncate max-w-[160px]">{u.email}</td>
-                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
-                            {u.phone ?? <span className="text-slate-600">—</span>}
+                          <td className="px-4 py-3">
+                            <div className="text-slate-400 truncate" title={u.email}>{u.email}</div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="text-slate-400 truncate">{u.phone ?? <span className="text-slate-600">—</span>}</div>
                           </td>
                           <td className="px-4 py-3">
                             {u.role === 'Admin'
@@ -260,11 +270,11 @@ export default function Admin() {
                                 : <span className="text-slate-600 text-xs">—</span>
                             }
                           </td>
-                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
-                            {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                            {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}
                           </td>
-                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
-                            {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : <span className="text-slate-600">—</span>}
+                          <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                            {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : <span className="text-slate-600">—</span>}
                           </td>
                         </tr>
                       ))}
