@@ -15,7 +15,6 @@ public class AdminController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> GetUsers()
     {
         var users = await db.Users
-            .Where(u => u.Role != UserRole.Admin)
             .OrderBy(u => u.CreatedAt)
             .Select(u => new { u.Id, u.Name, u.Email })
             .ToListAsync();
