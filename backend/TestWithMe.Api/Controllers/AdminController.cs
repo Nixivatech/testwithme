@@ -45,6 +45,10 @@ public class AdminController(AppDbContext db) : ControllerBase
         await db.ProgressEntries.Where(p => ids.Contains(p.UserId)).ExecuteDeleteAsync();
         await db.Enrollments.Where(e => ids.Contains(e.UserId)).ExecuteDeleteAsync();
         await db.Certificates.Where(c => ids.Contains(c.UserId)).ExecuteDeleteAsync();
+        await db.Users.Where(u => ids.Contains(u.Id))
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(u => u.Phone, (string?)null)
+                .SetProperty(u => u.Professional, (string?)null));
 
         return Ok(new { message = $"Flushed data for {ids.Count} user(s). Accounts preserved." });
     }
