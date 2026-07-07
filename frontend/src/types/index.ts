@@ -10,6 +10,7 @@ export interface User {
   phone: string | null
   professional: string | null
   isProfileComplete: boolean
+  createdAt: string
 }
 
 export interface ModuleSummary {

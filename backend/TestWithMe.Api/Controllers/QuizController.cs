@@ -29,6 +29,14 @@ public class QuizController(AppDbContext db) : ControllerBase
     {
         var userId = User.GetUserId();
 
+        var topicForExpiry = await db.Topics.FirstOrDefaultAsync(t => t.Id == request.TopicId);
+        if (topicForExpiry is not null)
+        {
+            var enrollment = await db.Enrollments.FirstOrDefaultAsync(e => e.UserId == userId && e.ModuleId == topicForExpiry.ModuleId);
+            if (enrollment is not null && enrollment.ExpiresAt < DateTimeOffset.UtcNow)
+                return StatusCode(403, new { message = "Your access to this module has expired.", expired = true });
+        }
+
         var questions = await db.Questions
             .Where(q => q.TopicId == request.TopicId)
             .OrderBy(q => q.OrderIndex)

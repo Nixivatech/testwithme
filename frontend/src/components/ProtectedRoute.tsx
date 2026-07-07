@@ -7,7 +7,8 @@ export default function ProtectedRoute({ adminOnly = false }: { adminOnly?: bool
 
   if (isLoading) return null
   if (!user) return <Navigate to="/login" replace />
-  if (!user.isProfileComplete && pathname !== '/complete-profile') return <Navigate to="/complete-profile" replace />
+  const skipped = sessionStorage.getItem('profileSkipped') === '1'
+  if (!user.isProfileComplete && !skipped && pathname !== '/complete-profile') return <Navigate to="/complete-profile" replace />
   if (adminOnly && user.role !== 'Admin') return <Navigate to="/dashboard" replace />
 
   return <Outlet />

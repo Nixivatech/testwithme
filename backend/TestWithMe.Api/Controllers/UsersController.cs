@@ -22,7 +22,7 @@ public class UsersController(AppDbContext db) : ControllerBase
             return NotFound();
         }
 
-        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional));
+        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional, user.CreatedAt));
     }
 
     [HttpPost("heartbeat")]
@@ -31,6 +31,15 @@ public class UsersController(AppDbContext db) : ControllerBase
         var userId = User.GetUserId();
         await db.Users.Where(u => u.Id == userId)
             .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastSeenAt, DateTimeOffset.UtcNow));
+        return Ok();
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = User.GetUserId();
+        await db.Users.Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastSeenAt, (DateTimeOffset?)null));
         return Ok();
     }
 
@@ -47,7 +56,7 @@ public class UsersController(AppDbContext db) : ControllerBase
         user.UpdatedAt = DateTimeOffset.UtcNow;
         await db.SaveChangesAsync();
 
-        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional));
+        return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional, user.CreatedAt));
     }
 }
 

@@ -36,6 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    api.post('/api/users/logout').catch(() => {})
     clearToken()
     setUser(null)
   }

@@ -125,6 +125,12 @@ public class ModulesController(AppDbContext db) : ControllerBase
             return Forbid();
         }
 
+        var enrollment = await db.Enrollments.FirstOrDefaultAsync(e => e.UserId == userId && e.ModuleId == topic.ModuleId);
+        if (enrollment is not null && enrollment.ExpiresAt < DateTimeOffset.UtcNow)
+        {
+            return StatusCode(403, new { message = "Your access to this module has expired.", expired = true });
+        }
+
         var isCompleted = await db.ProgressEntries.AnyAsync(p => p.UserId == userId && p.TopicId == topic.Id);
 
         var siblings = await db.Topics

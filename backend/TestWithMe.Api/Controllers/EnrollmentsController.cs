@@ -13,14 +13,14 @@ namespace TestWithMe.Api.Controllers;
 public class EnrollmentsController(AppDbContext db) : ControllerBase
 {
     [HttpGet("mine")]
-    public async Task<ActionResult<List<Guid>>> GetMyEnrollments()
+    public async Task<IActionResult> GetMyEnrollments()
     {
         var userId = User.GetUserId();
-        var moduleIds = await db.Enrollments
+        var enrollments = await db.Enrollments
             .Where(e => e.UserId == userId)
-            .Select(e => e.ModuleId)
+            .Select(e => new { moduleId = e.ModuleId, expiresAt = e.ExpiresAt })
             .ToListAsync();
-        return Ok(moduleIds);
+        return Ok(enrollments);
     }
 
     [HttpPost("dummy-purchase")]
@@ -41,6 +41,7 @@ public class EnrollmentsController(AppDbContext db) : ControllerBase
             ModuleId = request.ModuleId,
             PurchasedAt = DateTimeOffset.UtcNow,
             AmountPaid = module.Price ?? 0,
+            ExpiresAt = DateTimeOffset.UtcNow.AddMonths(3),
         });
 
         await db.SaveChangesAsync();
@@ -90,6 +91,7 @@ public class EnrollmentsController(AppDbContext db) : ControllerBase
                 ModuleId = moduleId.Value,
                 PurchasedAt = DateTimeOffset.UtcNow,
                 AmountPaid = 0,
+                ExpiresAt = DateTimeOffset.UtcNow.AddMonths(3),
             });
 
             stored.UsedCount++;
@@ -112,6 +114,7 @@ public class EnrollmentsController(AppDbContext db) : ControllerBase
             ModuleId = moduleId.Value,
             PurchasedAt = DateTimeOffset.UtcNow,
             AmountPaid = 0,
+            ExpiresAt = DateTimeOffset.UtcNow.AddMonths(3),
         });
 
         await db.SaveChangesAsync();
