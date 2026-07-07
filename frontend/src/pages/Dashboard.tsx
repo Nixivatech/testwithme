@@ -30,72 +30,83 @@ export default function Dashboard() {
 
       {/* Hero */}
       <div className="relative overflow-hidden border-b border-white/10">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand/15 via-transparent to-transparent pointer-events-none" />
-        <div className="relative max-w-5xl mx-auto px-6 py-12 text-center">
-          <div className="inline-block bg-brand/20 text-brand-light text-[11px] font-semibold px-3 py-1 rounded-full border border-brand/30 mb-4 tracking-wide">
-            QA Learning Platform
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold leading-tight">
-            Welcome to <span className="text-brand-light">Mathilens!</span>
-          </h1>
-          {user?.name && (
-            <p className="text-base font-medium text-slate-400 mt-1">
-              Hey, {user.name.split(' ')[0]} 👋
-            </p>
-          )}
-          <p className="text-sm text-slate-400 leading-relaxed max-w-md mx-auto mt-3">
-            Your structured path from beginner to QA professional. Learn real-world testing skills, track your progress, and land your first QA job.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/browse"
-              className="inline-flex items-center gap-2 bg-brand text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-brand/90 active:scale-95 transition-all"
-            >
-              Find Topics to Learn
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M8 3l5 5-5 5M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
-            {completedTopics > 0 && (
-              <Link
-                to="/test"
-                className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-white/15 active:scale-95 transition-all"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
-                  <path d="M5 7h6M5 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                Take Test
-              </Link>
+        <div className="absolute inset-0 bg-gradient-to-br from-brand/15 via-transparent to-accent/5 pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto px-6 py-10">
+          <div className="lg:flex lg:items-center lg:gap-12">
+
+            {/* Left: greeting + CTA */}
+            <div className="flex-1">
+              {user?.name && (
+                <p className="text-brand-light font-semibold text-sm mb-1">
+                  Hey, {user.name.split(' ')[0]} 👋
+                </p>
+              )}
+              <h1 className="text-3xl font-bold text-white leading-tight">
+                Welcome to <span className="text-brand-light">Mathilens</span>
+              </h1>
+              <p className="text-sm text-slate-400 leading-relaxed mt-2 mb-5 max-w-sm">
+                Learn. Execute. Find your first QA job.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/browse"
+                  className="inline-flex items-center gap-2 bg-brand text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-brand/90 active:scale-95 transition-all"
+                >
+                  Find Topics to Learn
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 3l5 5-5 5M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </Link>
+                {completedTopics > 0 && (
+                  <Link
+                    to="/test"
+                    className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-white/15 active:scale-95 transition-all"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                      <path d="M5 7h6M5 10h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    Take Test
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Right: stats */}
+            {!isLoading && totalTopics > 0 && (
+              <div className="mt-8 lg:mt-0 flex-shrink-0 lg:min-w-[260px]">
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                    <p className="text-xl font-bold text-white">{modules.length}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Modules</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-3 text-center">
+                    <p className="text-xl font-bold text-white">{completedTopics}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Done</p>
+                  </div>
+                  <div className="bg-brand/20 border border-brand/30 rounded-xl p-3 text-center">
+                    <p className="text-xl font-bold text-brand-light">{overallPct}%</p>
+                    <p className="text-[10px] text-brand-light/70 mt-0.5">Progress</p>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-white/10">
+                  <div
+                    className="h-1.5 rounded-full bg-gradient-to-r from-brand to-accent transition-all duration-700"
+                    style={{ width: `${overallPct}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1.5">{completedTopics}/{totalTopics} topics completed</p>
+              </div>
             )}
+
           </div>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-10">
 
-        {/* Overall progress */}
-        {!isLoading && totalTopics > 0 && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-slate-400">Overall Progress</p>
-              <p className="text-xs text-slate-500">{completedTopics}/{totalTopics} topics</p>
-            </div>
-            <div className="h-2.5 w-full rounded-full bg-white/10">
-              <div
-                className="h-2.5 rounded-full bg-gradient-to-r from-brand to-accent transition-all duration-700"
-                style={{ width: `${overallPct}%` }}
-              />
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-[11px] text-slate-500">Keep going — you're doing great!</p>
-              <p className="text-sm font-bold text-brand-light">{overallPct}%</p>
-            </div>
-          </div>
-        )}
-
-        {/* How it works — 3 columns on desktop */}
-        <div>
+        {/* How it works — only for users who haven't started */}
+        {completedTopics === 0 && <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4">How it works</p>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
             {HOW_IT_WORKS.map((step, i) => (
@@ -113,7 +124,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Modules — 2 columns on desktop */}
         <div id="modules">
