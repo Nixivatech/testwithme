@@ -28,7 +28,78 @@ public class AdminController(AppDbContext db) : ControllerBase
     {
         var users = await db.Users
             .OrderByDescending(u => u.CreatedAt)
-            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.CreatedAt, u.LastSeenAt })
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.IsProMember, u.CreatedAt, u.LastSeenAt })
+            .ToListAsync();
+        return Ok(users);
+    }
+
+    [HttpGet("premium-users")]
+    public async Task<IActionResult> GetPremiumUsers()
+    {
+        var paidUserIds = await db.Enrollments
+            .Where(e => e.AmountPaid > 0)
+            .Select(e => e.UserId)
+            .Distinct()
+            .ToListAsync();
+
+        var users = await db.Users
+            .Where(u => paidUserIds.Contains(u.Id))
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.IsProMember, u.CreatedAt, u.LastSeenAt })
+            .ToListAsync();
+        return Ok(users);
+    }
+
+    [HttpGet("free-users")]
+    public async Task<IActionResult> GetFreeUsers()
+    {
+        var paidUserIds = await db.Enrollments
+            .Where(e => e.AmountPaid > 0)
+            .Select(e => e.UserId)
+            .Distinct()
+            .ToListAsync();
+
+        var users = await db.Users
+            .Where(u => u.Role != UserRole.Admin && !paidUserIds.Contains(u.Id))
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.IsProMember, u.CreatedAt, u.LastSeenAt })
+            .ToListAsync();
+        return Ok(users);
+    }
+
+    [HttpGet("expiring-users")]
+    public async Task<IActionResult> GetExpiringUsers()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var in15Days = now.AddDays(15);
+        var expiringUserIds = await db.Enrollments
+            .Where(e => e.ExpiresAt >= now && e.ExpiresAt <= in15Days)
+            .Select(e => e.UserId)
+            .Distinct()
+            .ToListAsync();
+
+        var users = await db.Users
+            .Where(u => expiringUserIds.Contains(u.Id))
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.IsProMember, u.CreatedAt, u.LastSeenAt })
+            .ToListAsync();
+        return Ok(users);
+    }
+
+    [HttpGet("expired-users")]
+    public async Task<IActionResult> GetExpiredUsers()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var expiredUserIds = await db.Enrollments
+            .Where(e => e.ExpiresAt < now)
+            .Select(e => e.UserId)
+            .Distinct()
+            .ToListAsync();
+
+        var users = await db.Users
+            .Where(u => expiredUserIds.Contains(u.Id))
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Phone, u.Professional, u.Role, u.IsProMember, u.CreatedAt, u.LastSeenAt })
             .ToListAsync();
         return Ok(users);
     }

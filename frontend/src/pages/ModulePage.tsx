@@ -7,7 +7,7 @@ import type { ModuleDetail } from '../types'
 export default function ModulePage() {
   const { moduleSlug } = useParams<{ moduleSlug: string }>()
   const [module, setModule] = useState<ModuleDetail | null>(null)
-  const { isEnrolled, enroll, redeemPromo, isLoading: enrollmentLoading } = useEnrollment()
+  const { isEnrolled, isExpired, getExpiresAt, enroll, redeemPromo, isLoading: enrollmentLoading } = useEnrollment()
   const [purchasing, setPurchasing] = useState(false)
   const [purchased, setPurchased] = useState(false)
   const [promoOpen, setPromoOpen] = useState(false)
@@ -29,7 +29,9 @@ export default function ModulePage() {
   }
 
   const isPaid = module.price != null
-  const hasAccess = !isPaid || isEnrolled(module.id) || purchased
+  const expired = isExpired(module.id)
+  const expiresAt = getExpiresAt(module.id)
+  const hasAccess = (!isPaid || isEnrolled(module.id) || purchased) && !expired
   const completedCount = module.topics.filter((t) => t.isCompleted).length
   const pct = module.topics.length === 0 ? 0 : Math.round((completedCount / module.topics.length) * 100)
   const featureList = module.features ? module.features.split('\n').filter(Boolean) : []
@@ -126,6 +128,13 @@ export default function ModulePage() {
                   </ul>
                 )}
 
+                {/* Expiry notice */}
+                {hasAccess && expiresAt && (
+                  <div className="text-[11px] text-slate-500 flex items-center gap-1">
+                    <span>⏳</span> Access until {expiresAt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
+                )}
+
                 {/* Progress (only if access + topics exist) */}
                 {hasAccess && hasTopics && (
                   <div>
@@ -178,13 +187,25 @@ export default function ModulePage() {
           {/* Right: topics or paywall */}
           <div className="lg:col-span-2">
             {!hasAccess ? (
-              /* Paywall */
+              /* Paywall / Expired */
               <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center">
-                <div className="text-5xl mb-4">🔒</div>
-                <h2 className="text-lg font-bold text-white mb-2">This module is locked</h2>
-                <p className="text-sm text-slate-400 mb-6 max-w-xs mx-auto">
-                  Purchase access to unlock all {module.topics.length} topics and start learning.
-                </p>
+                {expired ? (
+                  <>
+                    <div className="text-5xl mb-4">⏰</div>
+                    <h2 className="text-lg font-bold text-white mb-2">Your access has expired</h2>
+                    <p className="text-sm text-slate-400 mb-6 max-w-xs mx-auto">
+                      Your 3-month access to this module ended. Renew to continue learning.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-5xl mb-4">🔒</div>
+                    <h2 className="text-lg font-bold text-white mb-2">This module is locked</h2>
+                    <p className="text-sm text-slate-400 mb-6 max-w-xs mx-auto">
+                      Purchase access to unlock all {module.topics.length} topics and start learning.
+                    </p>
+                  </>
+                )}
                 <div className="space-y-2 text-left max-w-xs mx-auto mb-6">
                   {featureList.map((f) => (
                     <div key={f} className="flex items-center gap-2 text-sm text-slate-300">

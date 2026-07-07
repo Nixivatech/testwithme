@@ -2,11 +2,16 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '../lib/api'
 import type { ModuleSummary } from '../types'
 
-type Section = 'active-users' | 'total-users' | 'promo-code' | 'new-module' | 'dev-tools' | 'existing-modules'
+type Section = 'active-users' | 'total-users' | 'new-users' | 'premium-users' | 'free-users' | 'expiring-users' | 'expired-users' | 'promo-code' | 'new-module' | 'dev-tools' | 'existing-modules'
 
 const MENU: { id: Section; label: string; icon: string }[] = [
   { id: 'active-users',      label: 'Active Users',     icon: '🟢' },
   { id: 'total-users',       label: 'Total Users',      icon: '👥' },
+  { id: 'new-users',         label: 'New Users',        icon: '🆕' },
+  { id: 'premium-users',     label: 'Premium Users',    icon: '👑' },
+  { id: 'free-users',        label: 'Free Users',       icon: '🎓' },
+  { id: 'expiring-users',    label: 'Expiring Soon',    icon: '⏳' },
+  { id: 'expired-users',     label: 'Expired',          icon: '🔴' },
   { id: 'promo-code',        label: 'Promo Code',       icon: '🎟️' },
   { id: 'new-module',        label: 'New Module',       icon: '➕' },
   { id: 'dev-tools',         label: 'Dev Tools',        icon: '🛠️' },
@@ -21,7 +26,7 @@ interface ActiveUser {
 interface TotalUser {
   id: string; name: string; email: string; avatarUrl: string | null
   phone: string | null; professional: string | null; role: string
-  createdAt: string; lastSeenAt: string | null
+  isProMember: boolean; createdAt: string; lastSeenAt: string | null
 }
 
 interface PromoCode {
@@ -43,6 +48,91 @@ function Avatar({ url, name, size = 8 }: { url: string | null; name: string; siz
     : <div className={`w-${size} h-${size} rounded-full bg-brand/30 flex items-center justify-center text-xs font-bold text-brand flex-shrink-0`}>{name[0]}</div>
 }
 
+const CopyIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+)
+
+function UserTable({ users, title, subtitle, filename }: { users: TotalUser[]; title: string; subtitle?: string; filename: string }) {
+  function exportCsv() {
+    const rows = [['Name','Email','Mobile','Role','Joined'], ...users.map(u => [u.name, u.email, u.phone ?? '', u.role === 'Admin' ? 'Admin' : u.professional ?? '', new Date(u.createdAt).toLocaleDateString('en-IN')])]
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = filename; a.click()
+  }
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <h2 className="text-lg font-bold">{title} <span className="text-slate-500 font-normal text-sm">({users.length}{subtitle ? ' · ' + subtitle : ''})</span></h2>
+        {users.length > 0 && (
+          <div className="flex gap-2">
+            <button type="button" onClick={() => navigator.clipboard.writeText(users.map(u => u.email).join(', '))}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:border-white/30 transition-colors">
+              <CopyIcon /> Copy Emails
+            </button>
+            <button type="button" onClick={exportCsv}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:border-white/30 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" /></svg>
+              Export CSV
+            </button>
+          </div>
+        )}
+      </div>
+      {users.length === 0 ? <p className="text-sm text-slate-500">No users found.</p> : (
+        <div className="overflow-x-auto rounded-xl border border-white/10">
+          <table className="w-full text-sm table-fixed">
+            <colgroup>
+              <col style={{width:'22%'}} /><col style={{width:'34%'}} />
+              <col style={{width:'16%'}} /><col style={{width:'8%'}} />
+              <col style={{width:'10%'}} /><col style={{width:'10%'}} />
+            </colgroup>
+            <thead>
+              <tr className="border-b border-white/10 bg-white/5">
+                {['Name','Email ID','Mobile','Role','Joined','Last Seen'].map(h => (
+                  <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u, i) => (
+                <tr key={u.id} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i === users.length - 1 ? 'border-b-0' : ''}`}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Avatar url={u.avatarUrl} name={u.name} size={7} />
+                      <span className="text-white font-medium truncate">{u.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5 min-w-0 group">
+                      <div className="text-slate-400 truncate" title={u.email}>{u.email}</div>
+                      <button type="button" onClick={() => navigator.clipboard.writeText(u.email)} className="shrink-0 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-slate-300 transition-opacity" title="Copy email"><CopyIcon /></button>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3"><div className="text-slate-400 truncate">{u.phone ?? <span className="text-slate-600">—</span>}</div></td>
+                  <td className="px-4 py-3">
+                    {u.role === 'Admin'
+                      ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">A</span>
+                      : u.professional
+                        ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-slate-300" title={u.professional}>
+                            {u.professional === 'Student' ? 'S' : u.professional === 'Working Professional' ? 'W' : 'L'}
+                          </span>
+                        : <span className="text-slate-600 text-xs">—</span>
+                    }
+                  </td>
+                  <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">{new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })}</td>
+                  <td className="px-4 py-3 text-slate-400 text-xs whitespace-nowrap">
+                    {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }) : <span className="text-slate-600">—</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Admin() {
   const [section, setSection] = useState<Section>('active-users')
 
@@ -50,6 +140,14 @@ export default function Admin() {
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
   // Total users
   const [totalUsers, setTotalUsers] = useState<TotalUser[]>([])
+  // New users (last 7 days)
+  const [newUsers, setNewUsers] = useState<TotalUser[]>([])
+  // Premium / Free users
+  const [premiumUsers, setPremiumUsers] = useState<TotalUser[]>([])
+  const [freeUsers, setFreeUsers] = useState<TotalUser[]>([])
+  // Expiring / Expired users
+  const [expiringUsers, setExpiringUsers] = useState<TotalUser[]>([])
+  const [expiredUsers, setExpiredUsers] = useState<TotalUser[]>([])
   // Modules
   const [modules, setModules] = useState<ModuleSummary[]>([])
   // Promos
@@ -91,6 +189,11 @@ export default function Admin() {
       return () => clearInterval(id)
     }
     if (section === 'total-users') loadTotalUsers()
+    if (section === 'new-users') loadNewUsers()
+    if (section === 'premium-users') loadPremiumUsers()
+    if (section === 'free-users') loadFreeUsers()
+    if (section === 'expiring-users') loadExpiringUsers()
+    if (section === 'expired-users') loadExpiredUsers()
     if (section === 'promo-code') { loadPromos(); loadModules() }
     if (section === 'new-module') loadModules()
     if (section === 'dev-tools') loadFlushUsers()
@@ -102,6 +205,22 @@ export default function Admin() {
   }
   function loadTotalUsers() {
     api.get<TotalUser[]>('/api/admin/users').then((r) => setTotalUsers(r.data)).catch(() => {})
+  }
+  function loadNewUsers() {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000
+    api.get<TotalUser[]>('/api/admin/users').then((r) => setNewUsers(r.data.filter(u => new Date(u.createdAt).getTime() >= cutoff))).catch(() => {})
+  }
+  function loadPremiumUsers() {
+    api.get<TotalUser[]>('/api/admin/premium-users').then((r) => setPremiumUsers(r.data)).catch(() => {})
+  }
+  function loadFreeUsers() {
+    api.get<TotalUser[]>('/api/admin/free-users').then((r) => setFreeUsers(r.data)).catch(() => {})
+  }
+  function loadExpiringUsers() {
+    api.get<TotalUser[]>('/api/admin/expiring-users').then((r) => setExpiringUsers(r.data)).catch(() => {})
+  }
+  function loadExpiredUsers() {
+    api.get<TotalUser[]>('/api/admin/expired-users').then((r) => setExpiredUsers(r.data)).catch(() => {})
   }
   function loadModules() {
     api.get<ModuleSummary[]>('/api/modules').then((r) => setModules(r.data)).catch(() => {})
@@ -230,12 +349,12 @@ export default function Admin() {
                 <div className="overflow-x-auto rounded-xl border border-white/10">
                   <table className="w-full text-sm table-fixed">
                     <colgroup>
-                      <col style={{width:'20%'}} />
-                      <col style={{width:'26%'}} />
+                      <col style={{width:'22%'}} />
+                      <col style={{width:'34%'}} />
                       <col style={{width:'16%'}} />
-                      <col style={{width:'16%'}} />
-                      <col style={{width:'11%'}} />
-                      <col style={{width:'11%'}} />
+                      <col style={{width:'8%'}} />
+                      <col style={{width:'10%'}} />
+                      <col style={{width:'10%'}} />
                     </colgroup>
                     <thead>
                       <tr className="border-b border-white/10 bg-white/5">
@@ -257,16 +376,31 @@ export default function Admin() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="text-slate-400 break-all">{u.email}</div>
+                            <div className="flex items-center gap-1.5 min-w-0 group">
+                              <div className="text-slate-400 truncate" title={u.email}>{u.email}</div>
+                              <button
+                                type="button"
+                                onClick={() => navigator.clipboard.writeText(u.email)}
+                                className="shrink-0 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-slate-300 transition-opacity"
+                                title="Copy email"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                              </button>
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <div className="text-slate-400 truncate">{u.phone ?? <span className="text-slate-600">—</span>}</div>
                           </td>
                           <td className="px-4 py-3">
                             {u.role === 'Admin'
-                              ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">Admin</span>
+                              ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-400">A</span>
                               : u.professional
-                                ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-slate-300">{u.professional}</span>
+                                ? <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-slate-300" title={u.professional}>
+                                    {u.professional === 'Student' ? 'S' : u.professional === 'Working Professional' ? 'W' : 'L'}
+                                  </span>
                                 : <span className="text-slate-600 text-xs">—</span>
                             }
                           </td>
@@ -284,6 +418,21 @@ export default function Admin() {
               )}
             </div>
           )}
+
+          {/* New Users */}
+          {section === 'new-users' && <UserTable users={newUsers} title="New Users" subtitle="last 7 days" filename="new-users.csv" />}
+
+          {/* Premium Users */}
+          {section === 'premium-users' && <UserTable users={premiumUsers} title="Premium Users" filename="premium-users.csv" />}
+
+          {/* Free Users */}
+          {section === 'free-users' && <UserTable users={freeUsers} title="Free Users" filename="free-users.csv" />}
+
+          {/* Expiring Soon */}
+          {section === 'expiring-users' && <UserTable users={expiringUsers} title="Expiring Soon" subtitle="access ends within 15 days" filename="expiring-users.csv" />}
+
+          {/* Expired */}
+          {section === 'expired-users' && <UserTable users={expiredUsers} title="Expired Users" subtitle="3-month access ended" filename="expired-users.csv" />}
 
           {/* Promo Code */}
           {section === 'promo-code' && (

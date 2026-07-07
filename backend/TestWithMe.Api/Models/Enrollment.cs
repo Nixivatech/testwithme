@@ -7,6 +7,7 @@ public class Enrollment
     public Guid ModuleId { get; set; }
     public DateTimeOffset PurchasedAt { get; set; }
     public decimal AmountPaid { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
 
     public User? User { get; set; }
     public Module? Module { get; set; }
