@@ -191,8 +191,8 @@ export default function Admin() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <h2 className="text-lg font-bold">Active Users</h2>
-                <span className="text-xs text-slate-500 ml-1">last 5 minutes · refreshes every 30s</span>
+                <h2 className="text-lg font-bold">Active Users <span className="text-slate-500 font-normal text-sm">({activeUsers.length})</span></h2>
+                <span className="text-xs text-slate-500 ml-1">last 5 min · auto-refreshes</span>
               </div>
               {activeUsers.length === 0 ? (
                 <p className="text-sm text-slate-500">No users active right now.</p>
