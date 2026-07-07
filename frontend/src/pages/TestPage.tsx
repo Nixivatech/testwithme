@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import type { FullTestQuestion, FullTestResult } from '../types'
 
@@ -17,8 +17,6 @@ export default function TestPage() {
   const [result, setResult] = useState<FullTestResult | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null)
-  const navigate = useNavigate()
-
   useEffect(() => {
     api.get<FullTestQuestion[]>('/api/quiz/full-test')
       .then((res) => setQuestions(res.data))
