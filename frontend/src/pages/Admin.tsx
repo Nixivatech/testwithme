@@ -20,7 +20,17 @@ function getTodayCode() {
   return `ML${yy}${dd}${mm}`
 }
 
+interface ActiveUser {
+  id: string
+  name: string
+  email: string
+  avatarUrl: string | null
+  professional: string | null
+  lastSeenAt: string
+}
+
 export default function Admin() {
+  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([])
   const [modules, setModules] = useState<ModuleSummary[]>([])
   const [slug, setSlug] = useState('')
   const [title, setTitle] = useState('')
@@ -92,6 +102,10 @@ export default function Admin() {
     }
   }
 
+  function loadActiveUsers() {
+    api.get<ActiveUser[]>('/api/admin/active-users').then((res) => setActiveUsers(res.data)).catch(() => {})
+  }
+
   function loadModules() {
     api.get<ModuleSummary[]>('/api/modules').then((res) => setModules(res.data))
   }
@@ -100,7 +114,11 @@ export default function Admin() {
     api.get<PromoCode[]>('/api/promos').then((res) => setPromos(res.data)).catch(() => {})
   }
 
-  useEffect(() => { loadModules(); loadPromos(); loadFlushUsers() }, [])
+  useEffect(() => {
+    loadModules(); loadPromos(); loadFlushUsers(); loadActiveUsers()
+    const id = setInterval(loadActiveUsers, 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   async function handleCreatePromo(e: FormEvent) {
     e.preventDefault()
@@ -152,6 +170,42 @@ export default function Admin() {
       <div className="max-w-3xl mx-auto px-6 py-8">
 
         <h1 className="text-2xl font-bold mb-6">Admin</h1>
+
+        {/* Active Users */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
+              Active Now ({activeUsers.length})
+            </p>
+          </div>
+          {activeUsers.length === 0 ? (
+            <p className="text-sm text-slate-500">No users active in the last 5 minutes.</p>
+          ) : (
+            <div className="space-y-2">
+              {activeUsers.map((u) => {
+                const seenSec = Math.floor((Date.now() - new Date(u.lastSeenAt).getTime()) / 1000)
+                const seenLabel = seenSec < 60 ? `${seenSec}s ago` : `${Math.floor(seenSec / 60)}m ago`
+                return (
+                  <div key={u.id} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 flex items-center gap-3">
+                    {u.avatarUrl
+                      ? <img src={u.avatarUrl} alt={u.name} className="w-8 h-8 rounded-full flex-shrink-0" />
+                      : <div className="w-8 h-8 rounded-full bg-brand/30 flex items-center justify-center text-xs font-bold text-brand flex-shrink-0">{u.name[0]}</div>
+                    }
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-white truncate">{u.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{u.email}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      {u.professional && <p className="text-xs text-slate-400">{u.professional}</p>}
+                      <p className="text-xs text-green-400">{seenLabel}</p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Promo code section */}
         <div className="mb-8">

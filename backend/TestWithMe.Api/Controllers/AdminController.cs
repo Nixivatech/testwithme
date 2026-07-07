@@ -11,6 +11,18 @@ namespace TestWithMe.Api.Controllers;
 [Authorize(Roles = nameof(UserRole.Admin))]
 public class AdminController(AppDbContext db) : ControllerBase
 {
+    [HttpGet("active-users")]
+    public async Task<IActionResult> GetActiveUsers()
+    {
+        var cutoff = DateTimeOffset.UtcNow.AddMinutes(-5);
+        var active = await db.Users
+            .Where(u => u.LastSeenAt >= cutoff)
+            .OrderByDescending(u => u.LastSeenAt)
+            .Select(u => new { u.Id, u.Name, u.Email, u.AvatarUrl, u.Professional, u.LastSeenAt })
+            .ToListAsync();
+        return Ok(active);
+    }
+
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {

@@ -34,6 +34,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x => x.Professional).HasColumnName("professional");
             e.Property(x => x.CreatedAt).HasColumnName("created_at");
             e.Property(x => x.UpdatedAt).HasColumnName("updated_at");
+            e.Property(x => x.LastSeenAt).HasColumnName("last_seen_at");
             e.HasIndex(x => x.GoogleId).IsUnique();
             e.HasIndex(x => x.Email).IsUnique();
         });

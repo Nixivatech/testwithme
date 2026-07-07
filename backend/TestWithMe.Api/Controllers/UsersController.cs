@@ -25,6 +25,15 @@ public class UsersController(AppDbContext db) : ControllerBase
         return Ok(new UserDto(user.Id, user.Email, user.Name, user.AvatarUrl, user.Role.ToString(), user.IsProMember, user.Phone, user.Professional));
     }
 
+    [HttpPost("heartbeat")]
+    public async Task<IActionResult> Heartbeat()
+    {
+        var userId = User.GetUserId();
+        await db.Users.Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(s => s.SetProperty(u => u.LastSeenAt, DateTimeOffset.UtcNow));
+        return Ok();
+    }
+
     [HttpPatch("profile")]
     public async Task<ActionResult<UserDto>> UpdateProfile([FromBody] UpdateProfileRequest request)
     {

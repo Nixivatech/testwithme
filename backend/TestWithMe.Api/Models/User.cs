@@ -19,6 +19,7 @@ public class User
     public string? Professional { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? LastSeenAt { get; set; }
 
     public List<Progress> ProgressEntries { get; set; } = [];
     public List<Certificate> Certificates { get; set; } = [];
