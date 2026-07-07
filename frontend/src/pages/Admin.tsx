@@ -227,27 +227,42 @@ export default function Admin() {
               {totalUsers.length === 0 ? (
                 <p className="text-sm text-slate-500">No users yet.</p>
               ) : (
-                <div className="space-y-2">
-                  {totalUsers.map((u) => (
-                    <div key={u.id} className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 flex items-center gap-3">
-                      <Avatar url={u.avatarUrl} name={u.name} size={9} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-white truncate">{u.name}</p>
-                          {u.role === 'Admin' && <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full flex-shrink-0">Admin</span>}
-                        </div>
-                        <p className="text-xs text-slate-500 truncate">{u.email}</p>
-                        <div className="flex items-center gap-3 mt-0.5">
-                          {u.phone && <p className="text-xs text-slate-400">{u.phone}</p>}
-                          {u.professional && <p className="text-xs text-slate-400">{u.professional}</p>}
-                        </div>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-xs text-slate-500">Joined {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                        {u.lastSeenAt && <p className="text-xs text-slate-600">Last seen {new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>}
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto rounded-xl border border-white/10">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10 bg-white/5">
+                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Name</th>
+                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Email ID</th>
+                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Role</th>
+                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Joined</th>
+                        <th className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-4 py-3">Last Seen</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {totalUsers.map((u, i) => (
+                        <tr key={u.id} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${i === totalUsers.length - 1 ? 'border-b-0' : ''}`}>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                              <Avatar url={u.avatarUrl} name={u.name} size={7} />
+                              <span className="text-white font-medium truncate max-w-[120px]">{u.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 truncate max-w-[160px]">{u.email}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${u.role === 'Admin' ? 'bg-amber-400/10 text-amber-400' : 'bg-white/10 text-slate-400'}`}>
+                              {u.role}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                            {new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </td>
+                          <td className="px-4 py-3 text-slate-400 whitespace-nowrap">
+                            {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : <span className="text-slate-600">—</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
