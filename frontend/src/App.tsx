@@ -28,6 +28,7 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/profile" element={<CompleteProfile />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/browse" element={<BrowsePage />} />
           <Route path="/modules/:moduleSlug" element={<ModulePage />} />

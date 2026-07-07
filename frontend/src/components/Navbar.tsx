@@ -53,10 +53,12 @@ export default function Navbar() {
               </Link>
             )}
             <div className="flex items-center gap-2.5 pl-4 border-l border-white/10">
-              {user.avatarUrl && (
-                <img src={user.avatarUrl} alt={user.name} className="w-7 h-7 rounded-full ring-2 ring-brand/40" />
-              )}
-              <span className="text-sm text-slate-300 hidden md:block">{user.name.split(' ')[0]}</span>
+              <Link to="/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                {user.avatarUrl && (
+                  <img src={user.avatarUrl} alt={user.name} className="w-7 h-7 rounded-full ring-2 ring-brand/40" />
+                )}
+                <span className="text-sm text-slate-300 hidden md:block">{user.name.split(' ')[0]}</span>
+              </Link>
               <button onClick={handleLogout} className="text-xs text-slate-400 hover:text-white transition-colors ml-1">
                 Sign out
               </button>
@@ -92,16 +94,17 @@ export default function Navbar() {
         <div className="sm:hidden border-t border-white/10 bg-navy px-6 py-4">
           {user ? (
             <>
-              <div className="flex items-center gap-3 pb-4 mb-3 border-b border-white/10">
+              <Link to="/profile" onClick={close} className="flex items-center gap-3 pb-4 mb-3 border-b border-white/10 hover:opacity-80 transition-opacity">
                 {user.avatarUrl && <img src={user.avatarUrl} alt={user.name} className="w-10 h-10 rounded-full" />}
                 <div>
                   <p className="text-sm font-semibold text-white">{user.name}</p>
                   <p className="text-xs text-slate-500">{user.email}</p>
                 </div>
-              </div>
+              </Link>
               <div className="space-y-0.5">
                 <Link to="/dashboard" onClick={close} className="flex items-center px-3 py-3 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Dashboard</Link>
                 <Link to="/certificates" onClick={close} className="flex items-center px-3 py-3 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Certificates</Link>
+                <Link to="/profile" onClick={close} className="flex items-center px-3 py-3 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Edit Profile</Link>
                 {user.role === 'Admin' && (
                   <Link to="/admin" onClick={close} className="flex items-center px-3 py-3 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Admin</Link>
                 )}

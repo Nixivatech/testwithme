@@ -10,9 +10,11 @@ export default function CompleteProfile() {
   const { user, setUser } = useAuth()
   const navigate = useNavigate()
 
+  const isEditing = user?.isProfileComplete ?? false
+
   const [name, setName] = useState(user?.name ?? '')
-  const [phone, setPhone] = useState('')
-  const [professional, setProfessional] = useState('')
+  const [phone, setPhone] = useState(user?.phone ?? '')
+  const [professional, setProfessional] = useState(user?.professional ?? '')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -35,8 +37,8 @@ export default function CompleteProfile() {
   return (
     <div className="min-h-screen bg-navy flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-white mb-1">Complete your profile</h1>
-        <p className="text-sm text-slate-400 mb-8">Just a few more details before you get started.</p>
+        <h1 className="text-2xl font-bold text-white mb-1">{isEditing ? 'Edit Profile' : 'Complete your profile'}</h1>
+        <p className="text-sm text-slate-400 mb-8">{isEditing ? 'Update your details below.' : 'Just a few more details before you get started.'}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -89,7 +91,7 @@ export default function CompleteProfile() {
             disabled={submitting}
             className="w-full bg-brand text-white font-semibold py-3 rounded-xl hover:bg-brand/90 disabled:opacity-50 transition-colors mt-2"
           >
-            {submitting ? 'Saving…' : 'Continue to Dashboard'}
+            {submitting ? 'Saving…' : isEditing ? 'Save Changes' : 'Continue to Dashboard'}
           </button>
         </form>
       </div>
