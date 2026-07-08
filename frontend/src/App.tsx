@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import { useHeartbeat } from './hooks/useHeartbeat'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -11,6 +11,7 @@ import Certificates from './pages/Certificates'
 import CertificateVerify from './pages/CertificateVerify'
 import Pricing from './pages/Pricing'
 import Admin from './pages/Admin'
+import LearnSphere from './pages/LearnSphere'
 import LogoConcepts from './pages/LogoConcepts'
 import BrowsePage from './pages/BrowsePage'
 import TestPage from './pages/TestPage'
@@ -30,9 +31,12 @@ function Footer() {
 
 export default function App() {
   useHeartbeat()
+  const location = useLocation()
+  const isLearnSphere = location.pathname.startsWith('/learnsphere')
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {!isLearnSphere && <Navbar />}
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<Landing />} />
@@ -40,6 +44,7 @@ export default function App() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/verify/:certificateCode" element={<CertificateVerify />} />
           <Route path="/logo-concepts" element={<LogoConcepts />} />
+          <Route path="/learnsphere" element={<LearnSphere />} />
 
           <Route element={<ProtectedRoute />}>
             <Route path="/complete-profile" element={<CompleteProfile />} />
@@ -57,7 +62,7 @@ export default function App() {
           </Route>
         </Routes>
       </div>
-      <Footer />
+      {!isLearnSphere && <Footer />}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useEnrollment } from '../context/EnrollmentContext'
 import { useAuth } from '../context/AuthContext'
@@ -328,6 +329,16 @@ export default function Admin() {
               </button>
             ))}
           </nav>
+
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <Link
+              to="/learnsphere"
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <span className="text-base leading-none">🌐</span>
+              LearnSphere
+            </Link>
+          </div>
         </aside>
 
         {/* Content */}
