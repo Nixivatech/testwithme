@@ -12,7 +12,7 @@ public class GoogleAuthService(IOptions<GoogleAuthSettings> options) : IGoogleAu
     {
         var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings
         {
-            Audience = [_settings.ClientId]
+            Audience = new[] { _settings.ClientId }
         });
 
         return new GoogleProfile(payload.Subject, payload.Email, payload.Name, payload.Picture);
