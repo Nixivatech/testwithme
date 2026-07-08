@@ -3,7 +3,7 @@
 Learn Testing. Get Hired. A QA learning platform for Indian freshers — structured notes, progress
 tracking, and verifiable completion certificates.
 
-- **Frontend** (`/frontend`): React + Vite + TypeScript + Tailwind CSS → testwithme.in
+- **Frontend** (`/frontend`): React + Vite + TypeScript + Tailwind CSS → mathilens.com
 - **Backend** (`/backend`): .NET 8 Web API + EF Core (Npgsql) → api.testwithme.in
 - **Database**: PostgreSQL on Supabase
 - **Auth**: Google Sign-In on the frontend → backend verifies the Google ID token and issues its own JWT
